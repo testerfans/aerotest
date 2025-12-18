@@ -1,0 +1,97 @@
+[tool.poetry]
+name = "aerotest-ai"
+version = "0.1.0"
+description = "基于 AI 驱动的通用 UI 自动化测试平台"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+license = "MIT"
+packages = [{include = "aerotest"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+# CDP 核心 (Week 3)
+cdp-use = "^0.1.0"  # Chrome DevTools Protocol 客户端
+httpx = "^0.27.0"  # HTTP 客户端（用于 CDP REST API）
+# 复用 browser-use
+pydantic = "^2.0.0"
+pydantic-settings = "^2.0.0"
+uuid-extensions = "^0.1.0"  # UUID7 支持
+# 异步支持
+asyncio = "^3.4.3"
+aiofiles = "^23.2.1"
+# AI 集成
+openai = "^1.0.0"  # 支持兼容 OpenAI 格式的 API
+dashscope = "^1.14.0"  # 阿里云百炼平台 SDK
+# Web 框架
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standard"], version = "^0.32.0"}
+# 数据库
+sqlalchemy = "^2.0.0"
+alembic = "^1.13.0"
+asyncpg = "^0.29.0"  # PostgreSQL 异步驱动
+# NLP 和文本处理
+jieba = "^0.42.1"
+rapidfuzz = "^3.5.2"  # 模糊匹配
+# 日志和监控
+loguru = "^0.7.2"
+# 工具类
+python-dotenv = "^1.0.0"
+click = "^8.1.7"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.0"
+pytest-cov = "^4.1.0"
+black = "^24.0.0"
+ruff = "^0.6.0"
+mypy = "^1.8.0"
+ipython = "^8.20.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+aerotest = "aerotest.cli:main"
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+include = '\.pyi?$'
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+]
+ignore = [
+    "E501", # line too long (handled by black)
+    "B008", # do not perform function calls in argument defaults
+]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "--cov=aerotest --cov-report=html --cov-report=term-missing"
+
