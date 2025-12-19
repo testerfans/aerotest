@@ -1,4 +1,4 @@
-"""健康检查路�?""
+"""健康检查路由"""
 
 from datetime import datetime
 
@@ -12,10 +12,10 @@ router = APIRouter()
 @router.get("/health")
 async def health_check() -> dict:
     """
-    健康检查接�?
+    健康检查接口
 
     Returns:
-        健康状态信�?
+        健康状态信息
     """
     return {
         "status": "healthy",
@@ -33,4 +33,3 @@ async def ping() -> dict:
         Pong 响应
     """
     return {"message": "pong"}
-

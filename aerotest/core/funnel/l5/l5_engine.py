@@ -1,6 +1,6 @@
 """L5 引擎
 
-L5 视觉识别引擎，整合所�?L5 组件
+L5 视觉识别引擎，整合所有 L5 组件
 """
 
 from typing import Optional
@@ -20,8 +20,8 @@ logger = get_logger("aerotest.funnel.l5")
 class L5Engine(BaseFunnelLayer):
     """L5 视觉识别引擎
     
-    使用 Qwen2-VL 进行视觉识别，处�?Canvas 和图像元素：
-    1. 检查是否需�?L5
+    使用 Qwen2-VL 进行视觉识别，处理 Canvas 和图像元素：
+    1. 检查是否需要 L5
     2. 截取页面截图
     3. 调用 Qwen2-VL 识别元素
     4. 解析坐标
@@ -44,14 +44,14 @@ class L5Engine(BaseFunnelLayer):
     """
     
     def __init__(self):
-        """初始�?L5 引擎"""
+        """初始化 L5 引擎"""
         super().__init__("L5")
         
-        # 初始化组�?
+        # 初始化组件
         self.screenshot_service = ScreenshotService()
         self.qwen2vl_client = Qwen2VLClient()
         
-        self.logger.info("L5 引擎初始化完�?)
+        self.logger.info("L5 引擎初始化完成")
     
     async def process(
         self,
@@ -63,25 +63,25 @@ class L5Engine(BaseFunnelLayer):
         视觉识别处理
         
         Args:
-            context: 漏斗上下�?
-            dom_state: DOM 状�?
+            context: 漏斗上下文
+            dom_state: DOM 状态
             cdp_session: CDP 会话（必需，用于截图）
             
         Returns:
-            更新后的上下文（包含 l5_candidates�?
+            更新后的上下文（包含 l5_candidates）
         """
         self.log_start()
         
         if not context.action_slot:
-            self.logger.warning("没有槽位信息，跳�?L5")
+            self.logger.warning("没有槽位信息，跳过 L5")
             return context
         
         if not cdp_session:
-            self.logger.warning("没有 CDP 会话，跳�?L5")
+            self.logger.warning("没有 CDP 会话，跳过 L5")
             return context
         
-        # 1. 检查是否需�?L5
-        # 如果前面的层已经有结果，且包含视觉相关关键词才使�?L5
+        # 1. 检查是否需要 L5
+        # 如果前面的层已经有结果，且包含视觉相关关键词才使用 L5
         if not self._needs_visual_recognition(context.instruction):
             self.logger.info("指令不需要视觉识别，跳过 L5")
             return context
@@ -146,26 +146,26 @@ class L5Engine(BaseFunnelLayer):
                 f"at ({bbox.center_x:.0f}, {bbox.center_y:.0f})"
             )
         else:
-            self.logger.warning(f"未找到视觉元�? {target_desc}")
+            self.logger.warning(f"未找到视觉元素: {target_desc}")
         
         self.log_end(len(context.l5_candidates) if context.l5_candidates else 0)
         return context
     
     def _needs_visual_recognition(self, instruction: str) -> bool:
         """
-        判断是否需要视觉识�?
+        判断是否需要视觉识别
         
         Args:
             instruction: 用户指令
             
         Returns:
-            是否需要视觉识�?
+            是否需要视觉识别
         """
         # 包含颜色、形状等视觉特征的关键词
         visual_keywords = [
             "红色", "蓝色", "绿色", "黄色", "黑色", "白色",
-            "图标", "图片", "按钮图标", "小图�?,
-            "圆形", "方形", "三角�?,
+            "图标", "图片", "按钮图标", "小图标",
+            "圆形", "方形", "三角形",
             "canvas", "画布",
         ]
         

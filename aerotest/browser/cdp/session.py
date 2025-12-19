@@ -1,9 +1,9 @@
 """CDP 会话管理
 
-提供简化的 CDP 会话接口，用于获�?DOM 和执行页面操�?
+提供简化的 CDP 会话接口，用于获取 DOM 和执行页面操作
 
 来源: 简化并改造自 browser-use v0.11.2
-核心算法: 复用 browser-use �?DOM 获取逻辑
+核心算法: 复用 browser-use 的 DOM 获取逻辑
 """
 
 import asyncio
@@ -27,9 +27,9 @@ logger = get_logger("aerotest.cdp.session")
 class CDPSession:
     """简化的 CDP 会话
     
-    提供�?
+    提供：
     - 页面导航
-    - DOM 获取（复�?browser-use 核心算法�?
+    - DOM 获取（复用 browser-use 核心算法）
     - 基本页面操作
     
     不包含（相比 browser-use）：
@@ -53,7 +53,7 @@ class CDPSession:
         target_info: Optional[TargetInfo] = None,
     ):
         """
-        初始�?CDP 会话
+        初始化 CDP 会话
         
         Args:
             connection: CDP 连接
@@ -64,7 +64,7 @@ class CDPSession:
         self.session_id: Optional[SessionID] = None
         self._page_info: Optional[PageInfo] = None
         
-        logger.debug("初始�?CDP 会话")
+        logger.debug("初始化 CDP 会话")
     
     @classmethod
     async def connect(
@@ -73,7 +73,7 @@ class CDPSession:
         target_info: Optional[TargetInfo] = None,
     ) -> "CDPSession":
         """
-        创建并连�?CDP 会话
+        创建并连接 CDP 会话
         
         Args:
             config: CDP 连接配置（如果为 None，使用默认配置）
@@ -89,23 +89,23 @@ class CDPSession:
         connection = CDPConnection(config)
         await connection.connect()
         
-        # 如果没有指定目标，获取第一个页�?
+        # 如果没有指定目标，获取第一个页面
         if target_info is None:
             target_info = await connection.get_first_page_target()
             
             if target_info is None:
-                # 创建新页�?
+                # 创建新页面
                 logger.info("没有可用页面，创建新页面...")
                 target_info = await connection.create_new_page()
                 
                 if target_info is None:
-                    raise RuntimeError("无法创建新页�?)
+                    raise RuntimeError("无法创建新页面")
         
         # 创建会话
         session = cls(connection, target_info)
         await session._attach_to_target()
         
-        logger.info(f"�?CDP 会话已创�? {target_info.title or target_info.url}")
+        logger.info(f"✅ CDP 会话已创建: {target_info.title or target_info.url}")
         return session
     
     async def disconnect(self):
@@ -116,29 +116,29 @@ class CDPSession:
                 await self.connection.client.send.Target.detachFromTarget(
                     params={"sessionId": self.session_id}
                 )
-                logger.debug(f"已分离目�? {self.target_info.target_id}")
+                logger.debug(f"已分离目标: {self.target_info.target_id}")
             except Exception as e:
-                logger.debug(f"分离目标时出�? {e}")
+                logger.debug(f"分离目标时出错: {e}")
         
         # 断开连接
         await self.connection.disconnect()
-        logger.info("�?CDP 会话已断开")
+        logger.info("✅ CDP 会话已断开")
     
     async def navigate(self, url: str, wait_until: str = "load") -> bool:
         """
-        导航�?URL
+        导航到 URL
         
         Args:
             url: 目标 URL
-            wait_until: 等待条件（load, domcontentloaded, networkidle�?
+            wait_until: 等待条件（load, domcontentloaded, networkidle）
             
         Returns:
             是否导航成功
         """
         try:
-            logger.info(f"导航�? {url}")
+            logger.info(f"导航到: {url}")
             
-            # 发送导航命�?
+            # 发送导航命令
             result = await self.connection.client.send.Page.navigate(
                 params={"url": url},
                 session_id=self.session_id
@@ -155,7 +155,7 @@ class CDPSession:
             # 更新页面信息
             await self._update_page_info()
             
-            logger.info(f"�?导航完成: {url}")
+            logger.info(f"✅ 导航完成: {url}")
             return True
             
         except Exception as e:
@@ -164,42 +164,42 @@ class CDPSession:
     
     async def get_dom_tree(self) -> EnhancedDOMTreeNode:
         """
-        获取增强�?DOM �?
+        获取增强的 DOM 树
         
-        完整实现：复�?browser-use �?DOM 获取算法
+        完整实现：复用 browser-use 的 DOM 获取算法
         
         Returns:
-            增强�?DOM 树根节点
+            增强的 DOM 树根节点
             
         Raises:
             RuntimeError: DOM 获取失败
         """
         try:
-            logger.debug("开始获取完�?DOM �?..")
+            logger.debug("开始获取完整 DOM 树...")
             
-            # 获取所有树（Snapshot, DOM Tree, AX Tree�?
+            # 获取所有树（Snapshot, DOM Tree, AX Tree）
             all_trees = await self._get_all_trees()
             
-            # 构建增强 DOM 树（完整版本�?
+            # 构建增强 DOM 树（完整版本）
             root_node = await self._build_enhanced_dom_tree(
                 all_trees,
                 html_frames=None,
                 total_frame_offset=None,
             )
             
-            logger.info(f"�?完整 DOM 树获取成�?)
+            logger.info(f"✅ 完整 DOM 树获取成功")
             return root_node
             
         except Exception as e:
-            logger.error(f"获取 DOM 树失�? {e}")
-            raise RuntimeError(f"获取 DOM 树失�? {e}") from e
+            logger.error(f"获取 DOM 树失败: {e}")
+            raise RuntimeError(f"获取 DOM 树失败: {e}") from e
     
     async def evaluate(self, expression: str) -> dict:
         """
         执行 JavaScript 代码
         
         Args:
-            expression: JavaScript 表达�?
+            expression: JavaScript 表达式
             
         Returns:
             执行结果
@@ -254,7 +254,7 @@ class CDPSession:
             
             # 解码 base64
             screenshot_data = base64.b64decode(result["data"])
-            logger.info(f"�?截图完成: {len(screenshot_data)} 字节")
+            logger.info(f"✅ 截图完成: {len(screenshot_data)} 字节")
             return screenshot_data
             
         except Exception as e:
@@ -264,9 +264,9 @@ class CDPSession:
     # ========== 内部方法 ==========
     
     async def _attach_to_target(self):
-        """附加到目�?""
+        """附加到目标"""
         try:
-            # 附加到目�?
+            # 附加到目标
             result = await self.connection.client.send.Target.attachToTarget(
                 params={
                     "targetId": self.target_info.target_id,
@@ -277,14 +277,14 @@ class CDPSession:
             self.session_id = result["sessionId"]
             logger.debug(f"已附加到目标: {self.target_info.target_id}")
             
-            # 启用必要�?CDP �?
+            # 启用必要的 CDP 域
             await self._enable_cdp_domains()
             
         except Exception as e:
-            raise RuntimeError(f"附加到目标失�? {e}") from e
+            raise RuntimeError(f"附加到目标失败: {e}") from e
     
     async def _enable_cdp_domains(self):
-        """启用必要�?CDP �?""
+        """启用必要的 CDP 域"""
         try:
             domains = ["Page", "DOM", "Runtime", "Accessibility", "DOMSnapshot"]
             
@@ -295,16 +295,16 @@ class CDPSession:
                     session_id=self.session_id
                 )
             
-            logger.debug(f"已启�?CDP �? {', '.join(domains)}")
+            logger.debug(f"已启用 CDP 域: {', '.join(domains)}")
             
         except Exception as e:
             logger.warning(f"启用 CDP 域时出错: {e}")
     
     async def _get_all_trees(self) -> TargetAllTrees:
         """
-        获取所有树（Snapshot, DOM Tree, AX Tree�?
+        获取所有树（Snapshot, DOM Tree, AX Tree）
         
-        复用 browser-use 的核心算�?
+        复用 browser-use 的核心算法
         
         Returns:
             TargetAllTrees 包含所有树数据
@@ -313,7 +313,7 @@ class CDPSession:
         timing = {}
         
         try:
-            # 1. 获取设备像素�?
+            # 1. 获取设备像素比
             device_pixel_ratio = await self._get_viewport_ratio()
             
             # 2. 并行获取 Snapshot, DOM Tree, AX Tree
@@ -341,7 +341,7 @@ class CDPSession:
                 self._get_ax_tree_for_all_frames()
             )
             
-            # 等待所有任务完�?
+            # 等待所有任务完成
             results = await asyncio.gather(
                 snapshot_task,
                 dom_tree_task,
@@ -351,7 +351,7 @@ class CDPSession:
             
             snapshot, dom_tree, ax_tree = results
             
-            # 检查错�?
+            # 检查错误
             if isinstance(snapshot, Exception):
                 raise snapshot
             if isinstance(dom_tree, Exception):
@@ -382,7 +382,7 @@ class CDPSession:
         """
         获取所有帧的辅助功能树
         
-        复用 browser-use 的算�?
+        复用 browser-use 的算法
         """
         try:
             # 获取帧树
@@ -400,7 +400,7 @@ class CDPSession:
             
             all_frame_ids = collect_frame_ids(frame_tree["frameTree"])
             
-            # 为每个帧获取 AX �?
+            # 为每个帧获取 AX 树
             ax_tree_tasks = []
             for frame_id in all_frame_ids:
                 task = self.connection.client.send.Accessibility.getFullAXTree(
@@ -409,10 +409,10 @@ class CDPSession:
                 )
                 ax_tree_tasks.append(task)
             
-            # 等待所有任务完�?
+            # 等待所有任务完成
             ax_trees = await asyncio.gather(*ax_tree_tasks, return_exceptions=True)
             
-            # 合并所�?AX 节点
+            # 合并所有 AX 节点
             merged_nodes = []
             for ax_tree in ax_trees:
                 if not isinstance(ax_tree, Exception) and "nodes" in ax_tree:
@@ -421,11 +421,11 @@ class CDPSession:
             return {"nodes": merged_nodes}
             
         except Exception as e:
-            logger.warning(f"获取 AX 树失�? {e}")
+            logger.warning(f"获取 AX 树失败: {e}")
             return {"nodes": []}
     
     async def _get_viewport_ratio(self) -> float:
-        """获取设备像素�?""
+        """获取设备像素比"""
         try:
             metrics = await self.connection.client.send.Page.getLayoutMetrics(
                 session_id=self.session_id
@@ -445,7 +445,7 @@ class CDPSession:
             return float(device_pixel_ratio)
             
         except Exception as e:
-            logger.debug(f"获取设备像素比失�? {e}")
+            logger.debug(f"获取设备像素比失败: {e}")
             return 1.0
     
     async def _build_enhanced_dom_tree(
@@ -455,17 +455,17 @@ class CDPSession:
         total_frame_offset: Optional["DOMRect"] = None,
     ) -> EnhancedDOMTreeNode:
         """
-        构建增强 DOM �?
+        构建增强 DOM 树
         
-        完整实现：复�?browser-use 的核心算�?
+        完整实现：复用 browser-use 的核心算法
         
         Args:
             all_trees: 所有树数据
-            html_frames: HTML 帧节点列�?
+            html_frames: HTML 帧节点列表
             total_frame_offset: 累积的帧偏移
             
         Returns:
-            增强�?DOM 树根节点
+            增强的 DOM 树根节点
         """
         import time
         from aerotest.browser.dom.cdp_types import DOMRect, EnhancedAXNode, EnhancedAXProperty
@@ -473,12 +473,12 @@ class CDPSession:
         
         start_time = time.time()
         
-        # 构建 snapshot 查找�?
+        # 构建 snapshot 查找表
         snapshot_lookup = build_snapshot_lookup(
             all_trees.snapshot,
             all_trees.device_pixel_ratio
         )
-        logger.debug(f"Snapshot 查找表构建完�? {len(snapshot_lookup)} 个节�?)
+        logger.debug(f"Snapshot 查找表构建完成: {len(snapshot_lookup)} 个节点")
         
         # 构建 AX 树查找表
         ax_tree_lookup: dict[int, dict] = {}
@@ -486,12 +486,12 @@ class CDPSession:
             for ax_node in all_trees.ax_tree["nodes"]:
                 if "backendNodeId" in ax_node:
                     ax_tree_lookup[ax_node["backendNodeId"]] = ax_node
-        logger.debug(f"AX 树查找表构建完成: {len(ax_tree_lookup)} 个节�?)
+        logger.debug(f"AX 树查找表构建完成: {len(ax_tree_lookup)} 个节点")
         
         # 记忆化查找表 (nodeId -> EnhancedDOMTreeNode)
         enhanced_dom_tree_node_lookup: dict[int, EnhancedDOMTreeNode] = {}
         
-        # �?DOM 树根节点开始构�?
+        # 从 DOM 树根节点开始构建
         dom_root = all_trees.dom_tree.get("root")
         if not dom_root:
             raise RuntimeError("DOM 树根节点为空")
@@ -502,16 +502,16 @@ class CDPSession:
             html_frames: Optional[list[EnhancedDOMTreeNode]],
             total_frame_offset: Optional[DOMRect],
         ) -> EnhancedDOMTreeNode:
-            """递归构建增强 DOM 节点（复�?browser-use 核心算法�?""
+            """递归构建增强 DOM 节点（复用 browser-use 核心算法）"""
             
-            # 初始�?
+            # 初始化
             if html_frames is None:
                 html_frames = []
             
             if total_frame_offset is None:
                 total_frame_offset = DOMRect(x=0.0, y=0.0, width=0.0, height=0.0)
             else:
-                # 复制以避免指针引�?
+                # 复制以避免指针引用
                 total_frame_offset = DOMRect(
                     x=total_frame_offset.x,
                     y=total_frame_offset.y,
@@ -527,7 +527,7 @@ class CDPSession:
             # 获取 backend_node_id
             backend_node_id = node.get("backendNodeId", 0)
             
-            # �?AX 树获取辅助功能信�?
+            # 从 AX 树获取辅助功能信息
             enhanced_ax_node = None
             ax_node = ax_tree_lookup.get(backend_node_id)
             if ax_node:
@@ -555,7 +555,7 @@ class CDPSession:
                     child_ids=ax_node.get("childIds"),
                 )
             
-            # 解析属�?
+            # 解析属性
             attributes = {}
             if "attributes" in node and node["attributes"]:
                 attrs_list = node["attributes"]
@@ -568,10 +568,10 @@ class CDPSession:
             if "shadowRootType" in node and node["shadowRootType"]:
                 shadow_root_type = node["shadowRootType"]
             
-            # �?Snapshot 获取数据
+            # 从 Snapshot 获取数据
             snapshot_data = snapshot_lookup.get(backend_node_id)
             
-            # 计算绝对位置（考虑 iframe 偏移�?
+            # 计算绝对位置（考虑 iframe 偏移量）
             absolute_position = None
             if snapshot_data and snapshot_data.bounds:
                 absolute_position = DOMRect(
@@ -607,7 +607,7 @@ class CDPSession:
             # 保存到查找表
             enhanced_dom_tree_node_lookup[node_id] = dom_tree_node
             
-            # 设置父节�?
+            # 设置父节点
             if "parentId" in node and node["parentId"]:
                 parent_id = node["parentId"]
                 if parent_id in enhanced_dom_tree_node_lookup:
@@ -622,7 +622,7 @@ class CDPSession:
             ):
                 updated_html_frames.append(dom_tree_node)
                 
-                # 调整帧偏移（考虑滚动�?
+                # 调整帧偏移（考虑滚动量）
                 if snapshot_data and snapshot_data.scrollRects:
                     total_frame_offset.x -= snapshot_data.scrollRects.x
                     total_frame_offset.y -= snapshot_data.scrollRects.y
@@ -669,7 +669,7 @@ class CDPSession:
                         shadow_root_node_ids.add(shadow_root.get("nodeId"))
                 
                 for child in node["children"]:
-                    # 跳过 shadow roots（已�?shadow_roots 列表中）
+                    # 跳过 shadow roots（已在 shadow_roots 列表中）
                     if child.get("nodeId") in shadow_root_node_ids:
                         continue
                     
@@ -693,7 +693,7 @@ class CDPSession:
         )
         
         elapsed = time.time() - start_time
-        logger.info(f"�?完整 DOM 树构建完�? {len(enhanced_dom_tree_node_lookup)} 个节�? 耗时 {elapsed*1000:.1f}ms")
+        logger.info(f"✅ 完整 DOM 树构建完成: {len(enhanced_dom_tree_node_lookup)} 个节点, 耗时 {elapsed*1000:.1f}ms")
         
         return root_node
     
@@ -708,9 +708,9 @@ class CDPSession:
             是否可见
         """
         if not node.snapshot_node:
-            return True  # �?snapshot 数据，假设可�?
+            return True  # 无 snapshot 数据，假设可见
         
-        # 检查计算样�?
+        # 检查计算样式
         if node.snapshot_node.computed_styles:
             styles = node.snapshot_node.computed_styles
             
@@ -743,7 +743,7 @@ class CDPSession:
                 self.evaluate("document.readyState"),
                 timeout=timeout
             )
-            # 简化实现：只检查一�?
+            # 简化实现：只检查一次
             await asyncio.sleep(0.5)  # 给一点时间让页面稳定
         except asyncio.TimeoutError:
             logger.warning("等待页面加载超时")
@@ -754,7 +754,7 @@ class CDPSession:
     
     async def _wait_for_network_idle(self, timeout: float = 30.0):
         """等待网络空闲"""
-        # 简化实现：等待一段时�?
+        # 简化实现：等待一段时间
         await asyncio.sleep(1.0)
     
     async def _update_page_info(self):
@@ -786,4 +786,3 @@ class CDPSession:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """异步上下文管理器出口"""
         await self.disconnect()
-

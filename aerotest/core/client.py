@@ -1,6 +1,6 @@
-"""AeroTest AI 主客户端
+"""AeroTest AI ä¸»å®¢æ·ç«¯
 
-提供统一的测试执行接口
+æä¾ç»ä¸çæµè¯æ§è¡æ¥å£
 """
 
 from typing import Optional
@@ -11,31 +11,31 @@ logger = get_logger("aerotest.client")
 
 
 class AeroTestClient:
-    """AeroTest AI 主客户端
+    """AeroTest AI ä¸»å®¢æ·ç«¯
     
-    提供统一的测试执行接口
+    æä¾ç»ä¸çæµè¯æ§è¡æ¥å£
     """
 
     def __init__(self, config: Optional[dict] = None):
         """
-        初始化客户端
+        åå§åå®¢æ·ç«¯
         
         Args:
-            config: 配置字典
+            config: éç½®å­å¸
         """
         self.config = config or {}
-        logger.info("AeroTest AI 客户端初始化完成")
+        logger.info("AeroTest AI å®¢æ·ç«¯åå§åå®æ")
 
     async def run_test(self, test_case):
         """
-        运行测试用例
+        è¿è¡æµè¯ç¨ä¾
         
         Args:
-            test_case: 测试用例
+            test_case: æµè¯ç¨ä¾
             
         Returns:
-            测试结果
+            æµè¯ç»æ
         """
-        logger.info(f"运行测试用例: {test_case}")
-        # TODO: 实现测试执行逻辑
+        logger.info(f"è¿è¡æµè¯ç¨ä¾: {test_case}")
+        # TODO: å®ç°æµè¯æ§è¡é»è¾
         pass

@@ -1,9 +1,9 @@
-"""DOM 树序列化�?
+"""DOM 树序列化器
 
-将增强的 DOM 树序列化为字符串格式�?LLM 使用
+将增强的 DOM 树序列化为字符串格式供 LLM 使用
 
 来源: browser-use v0.11.2  
-改�? 精简版本，保留核心序列化逻辑
+改动: 精简版本，保留核心序列化逻辑
 """
 
 import time
@@ -23,10 +23,10 @@ from aerotest.browser.dom.views import (
     SimplifiedNode,
 )
 
-# 禁用的元�?
+# 禁用的元素
 DISABLED_ELEMENTS = {'style', 'script', 'head', 'meta', 'link', 'title'}
 
-# SVG 子元素跳�?
+# SVG 子元素跳过
 SVG_ELEMENTS = {
     'path', 'rect', 'g', 'circle', 'ellipse', 'line', 'polyline',
     'polygon', 'use', 'defs', 'clipPath', 'mask', 'pattern',
@@ -35,9 +35,9 @@ SVG_ELEMENTS = {
 
 
 class DOMTreeSerializer:
-    """DOM 树序列化�?""
+    """DOM 树序列化器"""
 
-    # 传播边界的元素配�?
+    # 传播边界的元素配置
     PROPAGATING_ELEMENTS = [
         {'tag': 'a', 'role': None},
         {'tag': 'button', 'role': None},
@@ -75,7 +75,7 @@ class DOMTreeSerializer:
         """序列化可访问元素"""
         start_total = time.time()
 
-        # 重置状�?
+        # 重置状态
         self._interactive_counter = 1
         self._selector_map = {}
         self._clickable_cache = {}
@@ -85,18 +85,18 @@ class DOMTreeSerializer:
         simplified_tree = self._create_simplified_tree(self.root_node)
         self.timing_info['create_simplified_tree'] = time.time() - start_step1
 
-        # 步骤 2: 移除基于绘制顺序的元�?
+        # 步骤 2: 移除基于绘制顺序的元素
         start_step2 = time.time()
         if self.paint_order_filtering and simplified_tree:
             PaintOrderRemover(simplified_tree).calculate_paint_order()
         self.timing_info['calculate_paint_order'] = time.time() - start_step2
 
-        # 步骤 3: 优化�?
+        # 步骤 3: 优化树
         start_step3 = time.time()
         optimized_tree = self._optimize_tree(simplified_tree)
         self.timing_info['optimize_tree'] = time.time() - start_step3
 
-        # 步骤 4: 应用边界框过�?
+        # 步骤 4: 应用边界框过滤
         if self.enable_bbox_filtering and optimized_tree:
             start_step4 = time.time()
             filtered_tree = self._apply_bounding_box_filtering(optimized_tree)
@@ -114,7 +114,7 @@ class DOMTreeSerializer:
         return SerializedDOMState(_root=filtered_tree, selector_map=self._selector_map), self.timing_info
 
     def _is_interactive_cached(self, node: EnhancedDOMTreeNode) -> bool:
-        """缓存版本的可点击元素检�?""
+        """缓存版本的可点击元素检测"""
         if node.node_id not in self._clickable_cache:
             start_time = time.time()
             result = ClickableElementDetector.is_interactive(node)
@@ -148,15 +148,15 @@ class DOMTreeSerializer:
             return simplified if simplified.children else SimplifiedNode(original_node=node, children=[])
 
         elif node.node_type == NodeType.ELEMENT_NODE:
-            # 跳过非内容元�?
+            # 跳过非内容元素
             if node.node_name.lower() in DISABLED_ELEMENTS:
                 return None
 
-            # 跳过 SVG 子元�?
+            # 跳过 SVG 子元素
             if node.node_name.lower() in SVG_ELEMENTS:
                 return None
 
-            # 检查排除属�?
+            # 检查排除属性
             attributes = node.attributes or {}
             exclude_attr = None
             if self.session_id:
@@ -193,7 +193,7 @@ class DOMTreeSerializer:
             if not is_visible and is_file_input:
                 is_visible = True
 
-            # 包含可见、可滚动、有子节点或�?shadow host 的元�?
+            # 包含可见、可滚动、有子节点或是 shadow host 的元素
             if is_visible or is_scrollable or has_shadow_content or is_shadow_host:
                 simplified = SimplifiedNode(
                     original_node=node, children=[], is_shadow_host=is_shadow_host
@@ -220,11 +220,11 @@ class DOMTreeSerializer:
         return None
 
     def _optimize_tree(self, node: SimplifiedNode | None) -> SimplifiedNode | None:
-        """优化树结�?""
+        """优化树结构"""
         if not node:
             return None
 
-        # 处理子节�?
+        # 处理子节点
         optimized_children = []
         for child in node.children:
             optimized_child = self._optimize_tree(child)
@@ -254,7 +254,7 @@ class DOMTreeSerializer:
         return None
 
     def _apply_bounding_box_filtering(self, node: SimplifiedNode | None) -> SimplifiedNode | None:
-        """应用边界框过�?""
+        """应用边界框过滤"""
         if not node:
             return None
 
@@ -264,12 +264,12 @@ class DOMTreeSerializer:
     def _filter_tree_recursive(
         self, node: SimplifiedNode, active_bounds: PropagatingBounds | None = None, depth: int = 0
     ) -> None:
-        """递归过滤�?""
-        # 检查是否应该被激活边界排�?
+        """递归过滤树"""
+        # 检查是否应该被激活边界排除
         if active_bounds and self._should_exclude_child(node, active_bounds):
             node.excluded_by_parent = True
 
-        # 检查这个节点是否开始新的传�?
+        # 检查这个节点是否开始新的传播
         new_bounds = None
         tag = node.original_node.tag_name.lower()
         role = node.original_node.attributes.get('role') if node.original_node.attributes else None
@@ -290,18 +290,18 @@ class DOMTreeSerializer:
             self._filter_tree_recursive(child, propagate_bounds, depth + 1)
 
     def _should_exclude_child(self, node: SimplifiedNode, active_bounds: PropagatingBounds) -> bool:
-        """判断是否应该排除子节�?""
-        # 永远不排除文本节�?
+        """判断是否应该排除子节点"""
+        # 永远不排除文本节点
         if node.original_node.node_type == NodeType.TEXT_NODE:
             return False
 
-        # 获取子节点边�?
+        # 获取子节点边界
         if not node.original_node.snapshot_node or not node.original_node.snapshot_node.bounds:
             return False
 
         child_bounds = node.original_node.snapshot_node.bounds
 
-        # 检查包含关�?
+        # 检查包含关系
         if not self._is_contained(child_bounds, active_bounds.bounds, self.containment_threshold):
             return False
 
@@ -309,7 +309,7 @@ class DOMTreeSerializer:
         child_tag = node.original_node.tag_name.lower()
         child_role = node.original_node.attributes.get('role') if node.original_node.attributes else None
 
-        # 不排除表单元�?
+        # 不排除表单元素
         if child_tag in ['input', 'select', 'textarea', 'label']:
             return False
 
@@ -317,7 +317,7 @@ class DOMTreeSerializer:
         if self._is_propagating_element({'tag': child_tag, 'role': child_role}):
             return False
 
-        # 保留有明�?onclick 处理器的元素
+        # 保留有明确 onclick 处理器的元素
         if node.original_node.attributes and 'onclick' in node.original_node.attributes:
             return False
 
@@ -338,7 +338,7 @@ class DOMTreeSerializer:
         return containment_ratio >= threshold
 
     def _is_propagating_element(self, attributes: dict[str, str | None]) -> bool:
-        """检查元素是否应该传播边�?""
+        """检查元素是否应该传播边界"""
         for pattern in self.PROPAGATING_ELEMENTS:
             check = [
                 pattern.get(key) is None or pattern.get(key) == attributes.get(key)
@@ -367,7 +367,7 @@ class DOMTreeSerializer:
 
             should_make_interactive = False
             if is_scrollable:
-                # 只有没有交互子元素的可滚动容器才标记为交�?
+                # 只有没有交互子元素的可滚动容器才标记为交互
                 if not self._has_interactive_descendants(node):
                     should_make_interactive = True
             elif is_interactive and (is_visible or is_file_input):
@@ -383,7 +383,7 @@ class DOMTreeSerializer:
                     if node.original_node.backend_node_id not in previous_ids:
                         node.is_new = True
 
-        # 处理子节�?
+        # 处理子节点
         for child in node.children:
             self._assign_interactive_indices(child)
 
@@ -398,7 +398,7 @@ class DOMTreeSerializer:
 
     @staticmethod
     def serialize_tree(node: SimplifiedNode | None, include_attributes: list[str], depth: int = 0) -> str:
-        """将优化后的树序列化为字符串格�?""
+        """将优化后的树序列化为字符串格式"""
         if not node:
             return ''
 
@@ -437,7 +437,7 @@ class DOMTreeSerializer:
                 formatted_text.append(line)
                 return '\n'.join(formatted_text)
 
-            # 添加可点击、可滚动�?iframe 元素
+            # 添加可点击、可滚动或 iframe 元素
             is_any_scrollable = node.original_node.is_actually_scrollable or node.original_node.is_scrollable
             should_show_scroll = node.original_node.should_show_scroll_info
             
@@ -486,7 +486,7 @@ class DOMTreeSerializer:
                 clean_text = node.original_node.node_value.strip()
                 formatted_text.append(f'{depth_str}{clean_text}')
 
-        # 处理子节�?
+        # 处理子节点
         for child in node.children:
             child_text = DOMTreeSerializer.serialize_tree(child, include_attributes, next_depth)
             if child_text:
@@ -499,7 +499,7 @@ class DOMTreeSerializer:
         """构建属性字符串"""
         attributes_to_include = {}
 
-        # 包含 HTML 属�?
+        # 包含 HTML 属性
         if node.attributes:
             attributes_to_include.update({
                 key: str(value).strip()
@@ -507,7 +507,7 @@ class DOMTreeSerializer:
                 if key in include_attributes and str(value).strip() != ''
             })
 
-        # 包含可访问性属�?
+        # 包含可访问性属性
         if node.ax_node and node.ax_node.properties:
             for prop in node.ax_node.properties:
                 try:
@@ -524,7 +524,7 @@ class DOMTreeSerializer:
         if not attributes_to_include:
             return ''
 
-        # 格式化属�?
+        # 格式化属性
         formatted_attrs = []
         for key, value in attributes_to_include.items():
             capped_value = cap_text_length(value, 100)
@@ -534,4 +534,3 @@ class DOMTreeSerializer:
                 formatted_attrs.append(f'{key}={capped_value}')
 
         return ' '.join(formatted_attrs)
-

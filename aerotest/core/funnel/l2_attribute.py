@@ -19,7 +19,7 @@ class L2AttributeLayer(BaseFunnelLayer):
         super().__init__(ElementLocatorStrategy.L2_ATTRIBUTE)
         self.fuzzy_threshold = fuzzy_threshold
 
-        # 优先级属性列�?
+        # 优先级属性列表
         self.priority_attributes = [
             "placeholder",
             "aria-label",
@@ -31,33 +31,33 @@ class L2AttributeLayer(BaseFunnelLayer):
             "data-test",
         ]
 
-        logger.info(f"L2 属性匹配层初始化完�?(fuzzy_threshold={fuzzy_threshold})")
+        logger.info(f"L2 属性匹配层初始化完成 (fuzzy_threshold={fuzzy_threshold})")
 
     def can_handle(self, selector: str) -> bool:
-        """判断是否能处理该选择�?""
-        # L2 层可以处理任何文本描�?
+        """判断是否能处理该选择器"""
+        # L2 层可以处理任何文本描述
         return len(selector.strip()) > 0
 
     async def locate(
         self, selector: str, context: Dict[str, Any], dom_adapter: Any
     ) -> Optional[FunnelResult]:
         """
-        通过属性匹配定位元�?
+        通过属性匹配定位元素
 
         Args:
-            selector: 元素选择�?
-            context: 上下文信�?
-            dom_adapter: DOM 适配�?
+            selector: 元素选择器
+            context: 上下文信息
+            dom_adapter: DOM 适配器
 
         Returns:
-            FunnelResult �?None
+            FunnelResult 或 None
         """
         logger.debug(f"L2 属性层处理: {selector}")
 
         # TODO: 获取所有可交互元素
         # elements = await dom_adapter.find_clickable_elements()
 
-        # TODO: 遍历元素，计算属性匹配分�?
+        # TODO: 遍历元素，计算属性匹配分数
         # best_match = None
         # best_score = 0.0
 
@@ -90,7 +90,7 @@ class L2AttributeLayer(BaseFunnelLayer):
         """
         best_score = 0.0
 
-        # 按优先级检查各属�?
+        # 按优先级检查各属性
         for attr in self.priority_attributes:
             attr_value = element.attributes.get(attr, "")
             if attr_value:
@@ -98,10 +98,9 @@ class L2AttributeLayer(BaseFunnelLayer):
                 score = fuzz.ratio(target.lower(), attr_value.lower())
                 best_score = max(best_score, score)
 
-        # 检�?innerText
+        # 检查 innerText
         if element.text_content:
             text_score = fuzz.ratio(target.lower(), element.text_content.lower())
             best_score = max(best_score, text_score)
 
         return best_score
-

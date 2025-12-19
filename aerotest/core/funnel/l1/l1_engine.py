@@ -1,6 +1,6 @@
 """L1 引擎
 
-L1 层的主引擎，整合所�?L1 组件
+L1 层的主引擎，整合所有 L1 组件
 """
 
 from typing import Optional
@@ -17,12 +17,12 @@ from aerotest.core.funnel.types import ActionSlot, FunnelContext
 class L1Engine(BaseFunnelLayer):
     """L1 规则槽位引擎
     
-    从自然语言指令中提取结构化的操作信�?
+    从自然语言指令中提取结构化的操作信息
     
     完整的处理流程：
-    1. 使用 SlotFiller 填充基础槽位（内部调�?IntentRecognizer �?EntityExtractor�?
-    2. 使用 SynonymMapper 扩展关键�?
-    3. 返回完整�?ActionSlot
+    1. 使用 SlotFiller 填充基础槽位（内部调用 IntentRecognizer 和 EntityExtractor）
+    2. 使用 SynonymMapper 扩展关键词
+    3. 返回完整的 ActionSlot
     
     Example:
         ```python
@@ -44,15 +44,15 @@ class L1Engine(BaseFunnelLayer):
         max_synonyms: int = 10,
     ):
         """
-        初始�?L1 引擎
+        初始化 L1 引擎
         
         Args:
-            enable_synonym_expansion: 是否启用同义词扩�?
-            max_synonyms: 每个关键词最多扩展的同义词数�?
+            enable_synonym_expansion: 是否启用同义词扩展
+            max_synonyms: 每个关键词最多扩展的同义词数量
         """
         super().__init__("L1")
         
-        # 初始化各个组�?
+        # 初始化各个组件
         self.intent_recognizer = IntentRecognizer()
         self.entity_extractor = EntityExtractor()
         self.slot_filler = SlotFiller()
@@ -61,7 +61,7 @@ class L1Engine(BaseFunnelLayer):
         self.enable_synonym_expansion = enable_synonym_expansion
         
         self.logger.info(
-            f"L1 引擎初始化完�?(同义词扩�? {enable_synonym_expansion})"
+            f"L1 引擎初始化完成 (同义词扩展: {enable_synonym_expansion})"
         )
     
     async def process(
@@ -70,32 +70,32 @@ class L1Engine(BaseFunnelLayer):
         dom_state: Optional[SerializedDOMState] = None,
     ) -> FunnelContext:
         """
-        处理自然语言指令，提取槽位信�?
+        处理自然语言指令，提取槽位信息
         
         Args:
-            context: 漏斗上下�?
+            context: 漏斗上下文
             dom_state: DOM 状态（L1 不需要）
             
         Returns:
-            更新后的上下文（包含 action_slot�?
+            更新后的上下文（包含 action_slot）
         """
         self.log_start()
         
         instruction = context.instruction
         
-        # 1. 使用 SlotFiller 填充槽位（内部整合了 IntentRecognizer �?EntityExtractor�?
+        # 1. 使用 SlotFiller 填充槽位（内部整合了 IntentRecognizer 和 EntityExtractor）
         slot = self.slot_filler.fill(instruction)
         
-        # 2. 同义词扩展（如果启用�?
+        # 2. 同义词扩展（如果启用）
         if self.enable_synonym_expansion and slot.keywords:
             expanded_keywords = self.synonym_mapper.get_all_synonyms(slot.keywords)
             slot.keywords = expanded_keywords
             
             self.logger.debug(
-                f"关键词扩�? {len(slot.keywords)} 个关键词"
+                f"关键词扩展: {len(slot.keywords)} 个关键词"
             )
         
-        # 3. 更新上下�?
+        # 3. 更新上下文
         context.action_slot = slot
         
         # 4. 记录详细信息
@@ -111,7 +111,7 @@ class L1Engine(BaseFunnelLayer):
     
     def extract_slot(self, instruction: str) -> ActionSlot:
         """
-        提取槽位信息（同步版本，用于外部调用�?
+        提取槽位信息（同步版本，用于外部调用）
         
         Args:
             instruction: 自然语言指令
@@ -122,7 +122,7 @@ class L1Engine(BaseFunnelLayer):
         # 使用 SlotFiller 填充槽位
         slot = self.slot_filler.fill(instruction)
         
-        # 同义词扩�?
+        # 同义词扩展
         if self.enable_synonym_expansion and slot.keywords:
             expanded_keywords = self.synonym_mapper.get_all_synonyms(slot.keywords)
             slot.keywords = expanded_keywords
@@ -155,14 +155,14 @@ class L1Engine(BaseFunnelLayer):
         if not slot:
             return False
         
-        # 置信度阈�?
+        # 置信度阈值
         if slot.confidence < 0.3:
-            self.logger.warning(f"槽位置信度过�? {slot.confidence:.2f}")
+            self.logger.warning(f"槽位置信度过低: {slot.confidence:.2f}")
             return False
         
         # 必须有关键词
         if not slot.keywords:
-            self.logger.warning("槽位缺少关键�?)
+            self.logger.warning("槽位缺少关键词")
             return False
         
         return True

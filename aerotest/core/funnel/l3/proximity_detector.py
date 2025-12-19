@@ -24,17 +24,17 @@ logger = get_logger("aerotest.funnel.l3.proximity")
 class ProximityDetector:
     """邻近检测器
     
-    基于空间位置关系查找邻近元素�?
-    1. 计算元素间距�?
+    基于空间位置关系查找邻近元素：
+    1. 计算元素间距离
     2. 判断方向关系
-    3. 计算对齐�?
+    3. 计算对齐度
     4. 综合评分排序
     
     Example:
         ```python
         detector = ProximityDetector()
         
-        # 查找锚点右边的元�?
+        # 查找锚点右边的元素
         results = detector.find_nearby_elements(
             anchor=anchor_element,
             candidates=all_elements,
@@ -42,10 +42,10 @@ class ProximityDetector:
             max_distance=200.0,
         )
         
-        # 获取最佳匹�?
+        # 获取最佳匹配
         if results:
             best = results[0]
-            print(f"找到元素，距�? {best.distance:.1f}px")
+            print(f"找到元素，距离: {best.distance:.1f}px")
         ```
     """
     
@@ -59,14 +59,14 @@ class ProximityDetector:
         初始化邻近检测器
         
         Args:
-            max_distance: 最大搜索距离（像素�?
-            direction_tolerance: 方向容差（度�?
+            max_distance: 最大搜索距离（像素）
+            direction_tolerance: 方向容差（度）
             alignment_bonus: 对齐奖励分数
         """
         self.max_distance = max_distance
         self.direction_tolerance = direction_tolerance
         self.alignment_bonus = alignment_bonus
-        logger.debug("邻近检测器初始化完�?)
+        logger.debug("邻近检测器初始化完成")
     
     def find_nearby_elements(
         self,
@@ -80,7 +80,7 @@ class ProximityDetector:
         
         Args:
             anchor: 锚点元素
-            candidates: 候选元素列�?
+            candidates: 候选元素列表
             direction: 方向限制（None 表示不限制）
             max_distance: 最大距离（None 使用默认值）
             
@@ -149,10 +149,10 @@ class ProximityDetector:
             
             results.append(result)
         
-        # 排序（按得分降序�?
+        # 排序（按得分降序）
         results.sort(reverse=True)
         
-        logger.info(f"邻近搜索: 找到 {len(results)} 个候�?)
+        logger.info(f"邻近搜索: 找到 {len(results)} 个候选")
         
         return results
     
@@ -169,13 +169,13 @@ class ProximityDetector:
         
         Args:
             anchor_pos: 锚点位置
-            candidate_pos: 候选元素位�?
+            candidate_pos: 候选元素位置
             distance: 距离
             direction_match: 方向是否匹配
             direction: 方向
             
         Returns:
-            得分�?.0-1.0�?
+            得分（0.0-1.0）
         """
         # 1. 基础分：距离越近得分越高
         # 使用反比例函数：score = 1 / (1 + distance/100)
@@ -188,22 +188,22 @@ class ProximityDetector:
         alignment_bonus = 0.0
         
         if direction in [Direction.LEFT, Direction.RIGHT]:
-            # 水平方向，检查是否垂直对�?
+            # 水平方向，检查是否垂直对齐
             if is_horizontally_aligned(anchor_pos, candidate_pos):
                 alignment_bonus = self.alignment_bonus
         elif direction in [Direction.ABOVE, Direction.BELOW]:
-            # 垂直方向，检查是否水平对�?
+            # 垂直方向，检查是否水平对齐
             if is_vertically_aligned(anchor_pos, candidate_pos):
                 alignment_bonus = self.alignment_bonus
         
         # 4. 重叠惩罚
         overlap = calculate_overlap(anchor_pos, candidate_pos)
-        overlap_penalty = overlap * 0.3  # 重叠越多，惩罚越�?
+        overlap_penalty = overlap * 0.3  # 重叠越多，惩罚越大
         
         # 综合得分
         score = distance_score + direction_bonus + alignment_bonus - overlap_penalty
         
-        # 确保�?0-1 范围�?
+        # 确保在 0-1 范围内
         score = max(0.0, min(1.0, score))
         
         return score
@@ -214,7 +214,7 @@ class ProximityDetector:
         element: EnhancedDOMTreeNode,
     ) -> Optional[SpatialRelation]:
         """
-        计算两个元素的空间关�?
+        计算两个元素的空间关系
         
         Args:
             anchor: 锚点元素
@@ -250,12 +250,12 @@ class ProximityDetector:
         根据角度确定方向
         
         Args:
-            angle: 角度（度�?-360�?
+            angle: 角度（度，0-360）
             
         Returns:
             方向
         """
-        # 0�?= 右，90�?= 下，180�?= 左，270�?= �?
+        # 0度 = 右，90度 = 下，180度 = 左，270度 = 上
         if angle < 45 or angle >= 315:
             return Direction.RIGHT
         elif 45 <= angle < 135:
@@ -272,12 +272,12 @@ class ProximityDetector:
         max_distance: float = float('inf'),
     ) -> list[ProximityResult]:
         """
-        按距离范围过滤结�?
+        按距离范围过滤结果
         
         Args:
-            results: 邻近检测结�?
-            min_distance: 最小距�?
-            max_distance: 最大距�?
+            results: 邻近检测结果
+            min_distance: 最小距离
+            max_distance: 最大距离
             
         Returns:
             过滤后的结果
@@ -298,7 +298,7 @@ class ProximityDetector:
         
         Args:
             anchor: 锚点元素
-            candidates: 候选元素列�?
+            candidates: 候选元素列表
             direction: 方向限制
             
         Returns:
@@ -310,4 +310,3 @@ class ProximityDetector:
             return results[0].element
         
         return None
-

@@ -1,6 +1,6 @@
-"""绘制顺序移除�?
+"""绘制顺序移除器
 
-用于计算哪些元素应该根据绘制顺序参数被移�?
+用于计算哪些元素应该根据绘制顺序参数被移除
 
 来源: browser-use v0.11.2
 """
@@ -13,14 +13,14 @@ from aerotest.browser.dom.views import SimplifiedNode
 
 @dataclass(frozen=True, slots=True)
 class Rect:
-    """封闭轴对齐矩形，(x1,y1) 为左下角�?x2,y2) 为右上角"""
+    """封闭轴对齐矩形，(x1,y1) 为左下角，(x2,y2) 为右上角"""
     x1: float
     y1: float
     x2: float
     y2: float
 
     def __post_init__(self) -> None:
-        """验证矩形有效�?""
+        """验证矩形有效性"""
         if not (self.x1 <= self.x2 and self.y1 <= self.y2):
             pass  # 静默忽略无效矩形
 
@@ -29,7 +29,7 @@ class Rect:
         return (self.x2 - self.x1) * (self.y2 - self.y1)
 
     def intersects(self, other: 'Rect') -> bool:
-        """检查是否与另一个矩形相�?""
+        """检查是否与另一个矩形相交"""
         return not (
             self.x2 <= other.x1 or 
             other.x2 <= self.x1 or 
@@ -38,7 +38,7 @@ class Rect:
         )
 
     def contains(self, other: 'Rect') -> bool:
-        """检查是否包含另一个矩�?""
+        """检查是否包含另一个矩形"""
         return (
             self.x1 <= other.x1 and 
             self.y1 <= other.y1 and 
@@ -50,7 +50,7 @@ class Rect:
 class RectUnionPure:
     """
     维护不相交的矩形集合
-    无外部依�?- 适用于几千个矩形
+    无外部依赖 - 适用于几千个矩形
     """
 
     __slots__ = ('_rects',)
@@ -60,8 +60,8 @@ class RectUnionPure:
 
     def _split_diff(self, a: Rect, b: Rect) -> list[Rect]:
         """
-        返回最�?4 个矩形的列表 = a \ b
-        假设 a �?b 相交
+        返回最多 4 个矩形的列表 = a \ b
+        假设 a 与 b 相交
         """
         parts = []
 
@@ -73,15 +73,15 @@ class RectUnionPure:
         if b.y2 < a.y2:
             parts.append(Rect(a.x1, b.y2, a.x2, a.y2))
 
-        # 中间（垂直）条：y 重叠�?[max(a.y1,b.y1), min(a.y2,b.y2)]
+        # 中间（垂直）条：y 重叠区域 [max(a.y1,b.y1), min(a.y2,b.y2)]
         y_lo = max(a.y1, b.y1)
         y_hi = min(a.y2, b.y2)
 
-        # 左切�?
+        # 左切片
         if a.x1 < b.x1:
             parts.append(Rect(a.x1, y_lo, b.x1, y_hi))
         
-        # 右切�?
+        # 右切片
         if b.x2 < a.x2:
             parts.append(Rect(b.x2, y_lo, a.x2, y_hi))
 
@@ -105,15 +105,15 @@ class RectUnionPure:
                     new_stack.extend(self._split_diff(piece, s))
                 else:
                     new_stack.append(piece)
-            if not new_stack:  # 全部被吃�?- 被覆�?
+            if not new_stack:  # 全部被吃掉 - 被覆盖
                 return True
             stack = new_stack
-        return False  # 有东西幸�?
+        return False  # 有东西幸存
 
     def add(self, r: Rect) -> bool:
         """
-        插入 r，除非它已经被覆�?
-        如果并集增长则返�?True
+        插入 r，除非它已经被覆盖
+        如果并集增长则返回 True
         """
         if self.contains(r):
             return False
@@ -132,30 +132,30 @@ class RectUnionPure:
                     new_pending.append(piece)
             pending = new_pending
             if changed:
-                # s 未改变；继续下一个现有矩�?
+                # s 未改变；继续下一个现有矩形
                 i += 1
             else:
                 i += 1
 
-        # 任何剩余的片段都是新的、不重叠的区�?
+        # 任何剩余的片段都是新的、不重叠的区域
         self._rects.extend(pending)
         return True
 
 
 class PaintOrderRemover:
     """
-    根据绘制顺序参数计算应该移除的元�?
+    根据绘制顺序参数计算应该移除的元素
     """
 
     def __init__(self, root: SimplifiedNode):
         self.root = root
 
     def calculate_paint_order(self) -> None:
-        """计算绘制顺序并标记应该被忽略的元�?""
+        """计算绘制顺序并标记应该被忽略的元素"""
         all_simplified_nodes_with_paint_order: list[SimplifiedNode] = []
 
         def collect_paint_order(node: SimplifiedNode) -> None:
-            """递归收集具有绘制顺序的节�?""
+            """递归收集具有绘制顺序的节点"""
             if (
                 node.original_node.snapshot_node
                 and node.original_node.snapshot_node.paint_order is not None
@@ -168,7 +168,7 @@ class PaintOrderRemover:
 
         collect_paint_order(self.root)
 
-        # 按绘制顺序分�?
+        # 按绘制顺序分组
         grouped_by_paint_order: defaultdict[int, list[SimplifiedNode]] = defaultdict(list)
 
         for node in all_simplified_nodes_with_paint_order:
@@ -198,7 +198,7 @@ class PaintOrderRemover:
                 if rect_union.contains(rect):
                     node.ignored_by_paint_order = True
 
-                # 如果不透明度小�?0.8 或背景色透明，则不添加节�?
+                # 如果不透明度小于 0.8 或背景色透明，则不添加节点
                 if node.original_node.snapshot_node.computed_styles:
                     bg_color = node.original_node.snapshot_node.computed_styles.get(
                         'background-color', 'rgba(0, 0, 0, 0)'
@@ -212,4 +212,3 @@ class PaintOrderRemover:
 
             for rect in rects_to_add:
                 rect_union.add(rect)
-

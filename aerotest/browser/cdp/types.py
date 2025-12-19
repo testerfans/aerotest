@@ -11,13 +11,13 @@ from typing import Optional
 class CDPConnectionConfig:
     """CDP 连接配置
     
-    用于配置如何连接�?Chrome DevTools Protocol
+    用于配置如何连接到 Chrome DevTools Protocol
     
     Attributes:
-        host: CDP 服务器地址（通常�?localhost�?
-        port: CDP 端口（Chrome 默认 9222�?
-        timeout: 连接超时时间（秒�?
-        max_retries: 最大重试次�?
+        host: CDP 服务器地址（通常是 localhost）
+        port: CDP 端口（Chrome 默认 9222）
+        timeout: 连接超时时间（秒）
+        max_retries: 最大重试次数
     """
     
     host: str = "localhost"
@@ -38,16 +38,16 @@ class CDPConnectionConfig:
 
 @dataclass
 class TargetInfo:
-    """浏览器目标信�?
+    """浏览器目标信息
     
     Target 代表一个浏览上下文（页面、iframe、worker等）
     
     Attributes:
-        target_id: 目标唯一标识�?
+        target_id: 目标唯一标识符
         target_type: 目标类型（page, iframe, worker等）
         url: 当前 URL
         title: 页面标题
-        attached: 是否已附加会�?
+        attached: 是否已附加会话
     """
     
     target_id: str
@@ -58,12 +58,12 @@ class TargetInfo:
     
     @property
     def is_page(self) -> bool:
-        """是否是页面类�?""
+        """是否是页面类型"""
         return self.target_type == "page"
     
     @property
     def is_iframe(self) -> bool:
-        """是否�?iframe"""
+        """是否是 iframe"""
         return self.target_type == "iframe"
 
 
@@ -71,12 +71,12 @@ class TargetInfo:
 class PageInfo:
     """页面信息
     
-    包含页面的详细信息，包括目标和会�?ID
+    包含页面的详细信息，包括目标和会话 ID
     
     Attributes:
         target_info: 目标信息
         session_id: CDP 会话 ID
-        ready_state: 页面就绪状�?
+        ready_state: 页面就绪状态
     """
     
     target_info: TargetInfo
@@ -108,13 +108,13 @@ class PageInfo:
 class DOMFetchResult:
     """DOM 获取结果
     
-    包含从浏览器获取的各�?DOM 相关数据
+    包含从浏览器获取的各种 DOM 相关数据
     
     Attributes:
         snapshot: DOM 快照
-        dom_tree: DOM �?
-        ax_tree: 辅助功能�?
-        device_pixel_ratio: 设备像素�?
+        dom_tree: DOM 树
+        ax_tree: 辅助功能树
+        device_pixel_ratio: 设备像素比
         timing: 性能计时信息
     """
     
@@ -130,7 +130,7 @@ class ClickOptions:
     """点击选项
     
     Attributes:
-        button: 鼠标按钮（left, right, middle�?
+        button: 鼠标按钮（left, right, middle）
         click_count: 点击次数
         delay: 点击延迟（毫秒）
     """
@@ -146,7 +146,7 @@ class TypeOptions:
     
     Attributes:
         delay: 按键间隔（毫秒）
-        clear_first: 是否先清�?
+        clear_first: 是否先清除
     """
     
     delay: float = 50
@@ -158,12 +158,11 @@ class ScreenshotOptions:
     """截图选项
     
     Attributes:
-        format: 图片格式（png, jpeg�?
-        quality: JPEG 质量�?-100�?
+        format: 图片格式（png, jpeg）
+        quality: JPEG 质量（0-100）
         full_page: 是否全页截图
     """
     
     format: str = "png"
     quality: int = 90
     full_page: bool = False
-

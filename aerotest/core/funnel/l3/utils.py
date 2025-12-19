@@ -1,6 +1,6 @@
 """L3 工具函数
 
-空间布局计算的辅助函�?
+空间布局计算的辅助函数
 """
 
 import math
@@ -51,14 +51,14 @@ def calculate_distance(pos1: Position, pos2: Position) -> float:
 
 def calculate_angle(pos1: Position, pos2: Position) -> float:
     """
-    计算�?pos1 指向 pos2 的角�?
+    计算从 pos1 指向 pos2 的角度
     
     Args:
         pos1: 起始位置
         pos2: 目标位置
         
     Returns:
-        角度（度�?-360），0度为正右方，90度为正下�?
+        角度（度，0-360），0度为正右方，90度为正下方
     """
     dx = pos2.center_x - pos1.center_x
     dy = pos2.center_y - pos1.center_y
@@ -66,10 +66,10 @@ def calculate_angle(pos1: Position, pos2: Position) -> float:
     # 计算弧度
     angle_rad = math.atan2(dy, dx)
     
-    # 转换为度数（0-360�?
+    # 转换为度数（0-360）
     angle_deg = math.degrees(angle_rad)
     
-    # 确保�?0-360 范围�?
+    # 确保在 0-360 范围内
     if angle_deg < 0:
         angle_deg += 360
     
@@ -89,19 +89,19 @@ def is_in_direction(
         anchor_pos: 锚点位置
         element_pos: 元素位置
         direction: 方向
-        tolerance: 角度容差（度�?
+        tolerance: 角度容差（度）
         
     Returns:
-        是否在指定方�?
+        是否在指定方向
     """
     angle = calculate_angle(anchor_pos, element_pos)
     
     # 方向到角度范围的映射
     direction_angles = {
-        Direction.RIGHT: (0, 0),        # 0�?
-        Direction.BELOW: (90, 90),      # 90�?
-        Direction.LEFT: (180, 180),     # 180�?
-        Direction.ABOVE: (270, 270),    # 270�?
+        Direction.RIGHT: (0, 0),        # 0度
+        Direction.BELOW: (90, 90),      # 90度
+        Direction.LEFT: (180, 180),     # 180度
+        Direction.ABOVE: (270, 270),    # 270度
     }
     
     if direction not in direction_angles:
@@ -110,7 +110,7 @@ def is_in_direction(
     
     target_angle_min, target_angle_max = direction_angles[direction]
     
-    # 检查角度是否在容差范围�?
+    # 检查角度是否在容差范围内
     if target_angle_min == target_angle_max:
         # 单一方向
         target_angle = target_angle_min
@@ -150,11 +150,11 @@ def calculate_overlap(pos1: Position, pos2: Position) -> float:
     overlap_height = overlap_bottom - overlap_top
     overlap_area = overlap_width * overlap_height
     
-    # 计算两个矩形的面�?
+    # 计算两个矩形的面积
     area1 = pos1.width * pos1.height
     area2 = pos2.width * pos2.height
     
-    # 重叠�?= 重叠面积 / 较小矩形的面�?
+    # 重叠度 = 重叠面积 / 较小矩形的面积
     smaller_area = min(area1, area2)
     
     if smaller_area == 0:
@@ -174,12 +174,12 @@ def is_horizontally_aligned(
     Args:
         pos1: 位置 1
         pos2: 位置 2
-        threshold: 对齐阈值（相对于高度的比例�?
+        threshold: 对齐阈值（相对于高度的比例）
         
     Returns:
         是否水平对齐
     """
-    # 计算中心 Y 坐标的差�?
+    # 计算中心 Y 坐标的差异
     dy = abs(pos1.center_y - pos2.center_y)
     
     # 相对于较小高度的比例
@@ -202,12 +202,12 @@ def is_vertically_aligned(
     Args:
         pos1: 位置 1
         pos2: 位置 2
-        threshold: 对齐阈值（相对于宽度的比例�?
+        threshold: 对齐阈值（相对于宽度的比例）
         
     Returns:
         是否垂直对齐
     """
-    # 计算中心 X 坐标的差�?
+    # 计算中心 X 坐标的差异
     dx = abs(pos1.center_x - pos2.center_x)
     
     # 相对于较小宽度的比例
@@ -217,4 +217,3 @@ def is_vertically_aligned(
         return False
     
     return dx / min_width <= threshold
-

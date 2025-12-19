@@ -1,4 +1,4 @@
-"""Qwen2-VL 客户�?
+"""Qwen2-VL 客户端
 
 调用阿里云百炼平台的 Qwen2-VL 视觉模型 API
 """
@@ -16,7 +16,7 @@ logger = get_logger("aerotest.funnel.l5.qwen2vl")
 
 @dataclass
 class BoundingBox:
-    """边界�?""
+    """边界框"""
     x: float
     y: float
     width: float
@@ -34,13 +34,13 @@ class BoundingBox:
 
 
 class Qwen2VLClient:
-    """Qwen2-VL API 客户�?
+    """Qwen2-VL API 客户端
     
     调用阿里云百炼平台的 Qwen2-VL 视觉模型
     
     支持的功能：
-    - 图像理解：理解图片内�?
-    - 元素识别：识别图片中的特定元�?
+    - 图像理解：理解图片内容
+    - 元素识别：识别图片中的特定元素
     - 坐标定位：返回元素的位置坐标
     
     Example:
@@ -65,13 +65,13 @@ class Qwen2VLClient:
         timeout: int = 60,
     ):
         """
-        初始�?Qwen2-VL 客户�?
+        初始化 Qwen2-VL 客户端
         
         Args:
-            api_key: API Key（默认从配置读取�?
-            base_url: API Base URL（默认从配置读取�?
-            model: 模型名称（默认从配置读取�?
-            timeout: 超时时间（秒�?
+            api_key: API Key（默认从配置读取）
+            base_url: API Base URL（默认从配置读取）
+            model: 模型名称（默认从配置读取）
+            timeout: 超时时间（秒）
         """
         config = get_settings()
         
@@ -80,7 +80,7 @@ class Qwen2VLClient:
         self.model = model or config.qwen_vl_model
         self.timeout = timeout
         
-        # 创建 HTTP 客户�?
+        # 创建 HTTP 客户端
         self.http_client = httpx.AsyncClient(
             timeout=httpx.Timeout(timeout),
             headers={
@@ -101,9 +101,9 @@ class Qwen2VLClient:
         识别图片中的元素位置
         
         Args:
-            image_data: 图片数据（bytes�?
+            image_data: 图片数据（bytes）
             description: 元素描述
-            return_bbox: 是否返回边界�?
+            return_bbox: 是否返回边界框
             
         Returns:
             边界框，如果找不到则返回 None
@@ -173,7 +173,7 @@ class Qwen2VLClient:
                         
                         return bbox
                     else:
-                        logger.warning(f"未找到元�? {description}")
+                        logger.warning(f"未找到元素: {description}")
                         return None
                 
                 except json.JSONDecodeError:
@@ -196,10 +196,10 @@ class Qwen2VLClient:
         
         Args:
             image_data: 图片数据
-            question: 要问的问�?
+            question: 要问的问题
             
         Returns:
-            AI 的回�?
+            AI 的回答
         """
         import base64
         image_base64 = base64.b64encode(image_data).decode("utf-8")
@@ -246,6 +246,5 @@ class Qwen2VLClient:
             return ""
     
     async def close(self):
-        """关闭 HTTP 客户�?""
+        """关闭 HTTP 客户端"""
         await self.http_client.aclose()
-

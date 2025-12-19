@@ -1,4 +1,4 @@
-"""通义千问模型客户�?""
+"""通义千问模型客户端"""
 
 from typing import Any, Dict, List, Optional
 
@@ -12,7 +12,7 @@ logger = get_logger("aerotest.ai.qwen")
 
 
 class QwenClient:
-    """通义千问 API 客户�?""
+    """通义千问 API 客户端"""
 
     def __init__(self):
         """初始化客户端"""
@@ -20,7 +20,7 @@ class QwenClient:
         dashscope.api_key = self.settings.dashscope_api_key
 
         if not self.settings.dashscope_api_key:
-            logger.warning("DASHSCOPE_API_KEY 未配�?)
+            logger.warning("DASHSCOPE_API_KEY 未配置")
 
         logger.info("Qwen 客户端初始化完成")
 
@@ -36,9 +36,9 @@ class QwenClient:
 
         Args:
             messages: 对话消息列表
-            model: 模型名称（默认使�?qwen-max�?
+            model: 模型名称（默认使用 qwen-max）
             temperature: 温度参数
-            max_tokens: 最�?token �?
+            max_tokens: 最大 token 数
 
         Returns:
             模型响应文本
@@ -74,7 +74,7 @@ class QwenClient:
         使用 Qwen-Plus 分析元素定位
 
         Args:
-            context: 上下文信息，包括选择器、DOM 信息�?
+            context: 上下文信息，包括选择器、DOM 信息等
 
         Returns:
             分析结果
@@ -82,15 +82,15 @@ class QwenClient:
         selector = context.get("selector", "")
         dom_info = context.get("dom_info", {})
 
-        prompt = f"""你是一�?UI 自动化测试专家。请分析以下信息，帮助定位页面元素：
+        prompt = f"""你是一个 UI 自动化测试专家。请分析以下信息，帮助定位页面元素：
 
-选择器描�? {selector}
+选择器描述: {selector}
 
 DOM 信息: {dom_info}
 
-请分析并返回�?
-1. 最可能匹配的元�?
-2. 置信�?(0-1)
+请分析并返回以下：
+1. 最可能匹配的元素
+2. 置信度 (0-1)
 3. 推理过程
 """
 
@@ -107,4 +107,3 @@ DOM 信息: {dom_info}
         except Exception as e:
             logger.error(f"元素分析失败: {e}")
             return {"error": str(e), "confidence": 0.0}
-

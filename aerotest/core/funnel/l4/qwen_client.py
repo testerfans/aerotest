@@ -1,4 +1,4 @@
-"""Qwen 客户�?
+"""Qwen 客户端
 
 调用阿里云百炼平台的 Qwen 模型 API
 """
@@ -15,14 +15,14 @@ logger = get_logger("aerotest.funnel.l4.qwen")
 
 
 class QwenClient:
-    """Qwen API 客户�?
+    """Qwen API 客户端
     
-    调用阿里云百炼平台的 Qwen 模型（兼�?OpenAI API 格式�?
+    调用阿里云百炼平台的 Qwen 模型（兼容 OpenAI API 格式）
     
     支持的模型：
-    - qwen-max: 最强大的模�?
-    - qwen-plus: 平衡性能和成�?
-    - qwen-turbo: 快速响�?
+    - qwen-max: 最强大的模型
+    - qwen-plus: 平衡性能和成本
+    - qwen-turbo: 快速响应
     
     Example:
         ```python
@@ -46,13 +46,13 @@ class QwenClient:
         timeout: int = 60,
     ):
         """
-        初始�?Qwen 客户�?
+        初始化 Qwen 客户端
         
         Args:
-            api_key: API Key（默认从配置读取�?
-            base_url: API Base URL（默认从配置读取�?
-            model: 模型名称（默认从配置读取�?
-            timeout: 超时时间（秒�?
+            api_key: API Key（默认从配置读取）
+            base_url: API Base URL（默认从配置读取）
+            model: 模型名称（默认从配置读取）
+            timeout: 超时时间（秒）
         """
         # 使用 get_settings() 获取配置
         from aerotest.config.settings import get_settings
@@ -62,8 +62,9 @@ class QwenClient:
         self.base_url = base_url or config.qwen_base_url
         self.model = model or config.qwen_max_model
         self.timeout = timeout
+        self.config = config
         
-        # 创建 HTTP 客户�?
+        # 创建 HTTP 客户端
         self.http_client = httpx.AsyncClient(
             timeout=httpx.Timeout(timeout),
             headers={
@@ -88,12 +89,12 @@ class QwenClient:
         Args:
             messages: 消息列表，格式：[{"role": "user", "content": "..."}]
             model: 模型名称（覆盖默认值）
-            max_tokens: 最大生�?tokens
-            temperature: 温度参数�?-1�?
+            max_tokens: 最大生成 tokens
+            temperature: 温度参数（0-1）
             stream: 是否流式返回
             
         Returns:
-            AI 返回的文本内�?
+            AI 返回的文本内容
         """
         if not messages:
             raise ValueError("messages 不能为空")
@@ -102,15 +103,15 @@ class QwenClient:
         request_data = {
             "model": model or self.model,
             "messages": messages,
-            "max_tokens": max_tokens or config.qwen_max_tokens,
-            "temperature": temperature or config.qwen_temperature,
+            "max_tokens": max_tokens or self.config.qwen_max_tokens,
+            "temperature": temperature or self.config.qwen_temperature,
             "stream": stream,
         }
         
         logger.debug(f"调用 Qwen API: {request_data['model']}")
         
         try:
-            # 发送请�?
+            # 发送请求
             response = await self.http_client.post(
                 f"{self.base_url}/chat/completions",
                 json=request_data,
@@ -131,7 +132,7 @@ class QwenClient:
                     logger.info(
                         f"Qwen API 调用成功: "
                         f"tokens={usage.get('total_tokens', 0)}, "
-                        f"cost={usage.get('total_tokens', 0) * 0.0001:.4f}�?
+                        f"cost={usage.get('total_tokens', 0) * 0.0001:.4f}元"
                     )
                 
                 return content
@@ -154,7 +155,7 @@ class QwenClient:
         model: Optional[str] = None,
     ) -> dict[str, Any]:
         """
-        调用 Chat API 并期望返�?JSON 格式
+        调用 Chat API 并期望返回 JSON 格式
         
         Args:
             messages: 消息列表
@@ -163,18 +164,18 @@ class QwenClient:
         Returns:
             解析后的 JSON 对象
         """
-        # 在最后一条消息添�?JSON 格式要求
+        # 在最后一条消息添加 JSON 格式要求
         if messages:
             last_message = messages[-1]
             if last_message["role"] == "user":
-                last_message["content"] += "\n\n请以 JSON 格式返回结果�?
+                last_message["content"] += "\n\n请以 JSON 格式返回结果。"
         
         # 调用 API
         response = await self.chat(messages, model=model)
         
         # 解析 JSON
         try:
-            # 尝试提取 JSON（可能包含在代码块中�?
+            # 尝试提取 JSON（可能包含在代码块中）
             json_str = response
             
             # 如果包含 ```json，提取其中的内容
@@ -196,7 +197,7 @@ class QwenClient:
             raise ValueError(f"Qwen 返回的不是有效的 JSON: {str(e)}") from e
     
     async def close(self):
-        """关闭 HTTP 客户�?""
+        """关闭 HTTP 客户端"""
         await self.http_client.aclose()
     
     async def __aenter__(self):
@@ -204,7 +205,7 @@ class QwenClient:
         return self
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """异步上下文管理器退�?""
+        """异步上下文管理器退出"""
         await self.close()
 
 
@@ -213,9 +214,8 @@ _global_client: Optional[QwenClient] = None
 
 
 def get_qwen_client() -> QwenClient:
-    """获取全局 Qwen 客户端实�?""
+    """获取全局 Qwen 客户端实例"""
     global _global_client
     if _global_client is None:
         _global_client = QwenClient()
     return _global_client
-

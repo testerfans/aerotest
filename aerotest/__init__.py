@@ -1,5 +1,5 @@
 """
-AeroTest AI - 智能 UI 自动化测试平台
+AeroTest AI - æºè½ UI èªå¨åæµè¯å¹³å°
 """
 
 __version__ = "0.1.0"

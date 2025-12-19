@@ -1,36 +1,36 @@
-"""动作模式�?
+"""动作模式定义
 
-定义各种动作的识别模式和同义�?
+定义各种动作的识别模式和同义词
 """
 
 from aerotest.core.funnel.types import ActionType
 
-# 动作关键词映�?
+# 动作关键词映射
 ACTION_KEYWORDS = {
     ActionType.CLICK: {
-        "keywords": ["点击", "�?, "选择", "单击", "双击", "�?, "tap", "click"],
+        "keywords": ["点击", "按", "选择", "单击", "双击", "击", "tap", "click"],
         "patterns": [
             r"点击.*",
-            r"�?*",
+            r"按.*",
             r"选择.*",
-            r".*�?*",
+            r".*击.*",
         ],
     },
     ActionType.INPUT: {
-        "keywords": ["输入", "填写", "录入", "键入", "�?, "�?, "enter", "input", "type"],
+        "keywords": ["输入", "填写", "录入", "键入", "写", "打", "enter", "input", "type"],
         "patterns": [
             r"输入.*",
             r"填写.*",
             r".*输入.*",
-            r".*�?*",
+            r".*写.*",
         ],
     },
     ActionType.SELECT: {
-        "keywords": ["选择", "选中", "勾�?, "�?, "pick", "select", "choose"],
+        "keywords": ["选择", "选中", "勾选", "挑", "pick", "select", "choose"],
         "patterns": [
             r"选择.*",
-            r"勾�?*",
-            r".*�?*",
+            r"勾选.*",
+            r".*选.*",
         ],
     },
     ActionType.NAVIGATE: {
@@ -42,7 +42,7 @@ ACTION_KEYWORDS = {
         ],
     },
     ActionType.WAIT: {
-        "keywords": ["等待", "暂停", "�?, "wait", "sleep", "pause"],
+        "keywords": ["等待", "暂停", "停", "wait", "sleep", "pause"],
         "patterns": [
             r"等待.*",
             r"暂停.*",
@@ -52,15 +52,15 @@ ACTION_KEYWORDS = {
         "keywords": ["悬停", "移动", "hover", "mouseover"],
         "patterns": [
             r"悬停.*",
-            r"移动.*�?*",
+            r"移动.*到.*",
         ],
     },
     ActionType.DRAG: {
-        "keywords": ["拖动", "拖拽", "�?, "drag", "拖放"],
+        "keywords": ["拖动", "拖拽", "拖", "drag", "拖放"],
         "patterns": [
             r"拖动.*",
             r"拖拽.*",
-            r"�?*�?*",
+            r"拖.*到.*",
         ],
     },
     ActionType.SCROLL: {
@@ -88,11 +88,10 @@ ACTION_PRIORITY = {
 CONTEXT_HINTS = {
     "按钮": ActionType.CLICK,
     "链接": ActionType.CLICK,
-    "输入�?: ActionType.INPUT,
-    "文本�?: ActionType.INPUT,
+    "输入框": ActionType.INPUT,
+    "文本框": ActionType.INPUT,
     "复选框": ActionType.SELECT,
     "单选框": ActionType.SELECT,
-    "下拉�?: ActionType.SELECT,
+    "下拉框": ActionType.SELECT,
     "菜单": ActionType.CLICK,
 }
-

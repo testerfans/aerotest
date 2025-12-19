@@ -1,6 +1,6 @@
-"""文本匹配�?
+"""文本匹配器
 
-提供多种文本匹配策略：精确匹配、模糊匹配、包含匹�?
+提供多种文本匹配策略：精确匹配、模糊匹配、包含匹配
 """
 
 from rapidfuzz import fuzz
@@ -10,13 +10,13 @@ logger = get_logger("aerotest.funnel.l2.text")
 
 
 class TextMatcher:
-    """文本匹配�?
+    """文本匹配器
     
-    提供多种文本匹配策略，计算文本相似度�?
+    提供多种文本匹配策略，计算文本相似度：
     1. 精确匹配 (exact_match): 完全相同 -> 1.0
-    2. 模糊匹配 (fuzzy_match): 使用 rapidfuzz 计算相似�?
-    3. 包含匹配 (contains_match): 关键词是否包含在文本�?
-    4. 综合匹配 (match): 自动选择最佳策�?
+    2. 模糊匹配 (fuzzy_match): 使用 rapidfuzz 计算相似度
+    3. 包含匹配 (contains_match): 关键词是否包含在文本中
+    4. 综合匹配 (match): 自动选择最佳策略
     
     Example:
         ```python
@@ -49,8 +49,8 @@ class TextMatcher:
         初始化文本匹配器
         
         Args:
-            fuzzy_threshold: 模糊匹配的最低阈�?
-            contains_bonus: 包含匹配的奖励分�?
+            fuzzy_threshold: 模糊匹配的最低阈值
+            contains_bonus: 包含匹配的奖励分数
         """
         self.fuzzy_threshold = fuzzy_threshold
         self.contains_bonus = contains_bonus
@@ -62,10 +62,10 @@ class TextMatcher:
         
         Args:
             text: 要匹配的文本
-            keyword: 关键�?
+            keyword: 关键词
             
         Returns:
-            匹配得分 (1.0 �?0.0)
+            匹配得分 (1.0 或 0.0)
         """
         if not text or not keyword:
             return 0.0
@@ -81,11 +81,11 @@ class TextMatcher:
     
     def fuzzy_match(self, text: str, keyword: str) -> float:
         """
-        模糊匹配（使�?rapidfuzz�?
+        模糊匹配（使用 rapidfuzz）
         
         Args:
             text: 要匹配的文本
-            keyword: 关键�?
+            keyword: 关键词
             
         Returns:
             匹配得分 (0.0-1.0)
@@ -109,11 +109,11 @@ class TextMatcher:
     
     def contains_match(self, text: str, keyword: str) -> float:
         """
-        包含匹配（关键词是否在文本中�?
+        包含匹配（关键词是否在文本中）
         
         Args:
             text: 要匹配的文本
-            keyword: 关键�?
+            keyword: 关键词
             
         Returns:
             匹配得分 (0.0-1.0)
@@ -125,9 +125,9 @@ class TextMatcher:
         keyword_lower = keyword.lower().strip()
         
         if keyword_lower in text_lower:
-            # 计算覆盖�?
+            # 计算覆盖度
             coverage = len(keyword_lower) / len(text_lower)
-            # 基础�?0.6，覆盖度奖励最�?0.4
+            # 基础分 0.6，覆盖度奖励最多 0.4
             score = 0.6 + coverage * 0.4
             
             logger.debug(
@@ -140,13 +140,13 @@ class TextMatcher:
     
     def partial_ratio_match(self, text: str, keyword: str) -> float:
         """
-        部分匹配（使�?partial_ratio�?
+        部分匹配（使用 partial_ratio）
         
-        适用于关键词是文本的一部分的情�?
+        适用于关键词是文本的一部分的情况
         
         Args:
             text: 要匹配的文本
-            keyword: 关键�?
+            keyword: 关键词
             
         Returns:
             匹配得分 (0.0-1.0)
@@ -172,12 +172,12 @@ class TextMatcher:
         
         Args:
             text: 要匹配的文本
-            keyword: 关键�?
+            keyword: 关键词
             strategy: 匹配策略
-                - "auto": 自动选择最佳策�?
-                - "exact": 仅精确匹�?
-                - "fuzzy": 仅模糊匹�?
-                - "contains": 仅包含匹�?
+                - "auto": 自动选择最佳策略
+                - "exact": 仅精确匹配
+                - "fuzzy": 仅模糊匹配
+                - "contains": 仅包含匹配
             
         Returns:
             匹配得分 (0.0-1.0)
@@ -185,7 +185,7 @@ class TextMatcher:
         if not text or not keyword:
             return 0.0
         
-        # 1. 精确匹配（最高优先级�?
+        # 1. 精确匹配（最高优先级）
         exact_score = self.exact_match(text, keyword)
         if exact_score == 1.0:
             return 1.0
@@ -225,11 +225,11 @@ class TextMatcher:
         
         Args:
             text: 要匹配的文本
-            keywords: 关键词列�?
+            keywords: 关键词列表
             strategy: 匹配策略
             
         Returns:
-            最高匹配得�?
+            最高匹配得分
         """
         if not text or not keywords:
             return 0.0
@@ -258,7 +258,7 @@ class TextMatcher:
         
         Args:
             text: 要匹配的文本
-            keywords: 关键词列�?
+            keywords: 关键词列表
             strategy: 匹配策略
             
         Returns:
@@ -289,7 +289,7 @@ class TextMatcher:
         Args:
             text1: 文本 1
             text2: 文本 2
-            threshold: 相似度阈�?
+            threshold: 相似度阈值
             
         Returns:
             是否相似
@@ -299,4 +299,3 @@ class TextMatcher:
         
         score = self.fuzzy_match(text1, text2)
         return score >= threshold
-

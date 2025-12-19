@@ -1,10 +1,10 @@
-"""browser-use 浏览器适配�?""
+"""browser-use 浏览器适配器"""
 
 import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-# 添加 browser-use �?Python 路径
+# 添加 browser-use 到 Python 路径
 BROWSER_USE_PATH = Path(__file__).parent.parent.parent.parent / "browser-use"
 if BROWSER_USE_PATH.exists():
     sys.path.insert(0, str(BROWSER_USE_PATH))
@@ -16,14 +16,14 @@ logger = get_logger("aerotest.integration.browser")
 
 
 class BrowserAdapter:
-    """browser-use 浏览器会话适配�?""
+    """browser-use 浏览器会话适配器"""
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """
-        初始化浏览器适配�?
+        初始化浏览器适配器
 
         Args:
-            config: 可选的浏览器配�?
+            config: 可选的浏览器配置
         """
         self.settings = get_settings()
         self.config = config or {}
@@ -32,31 +32,31 @@ class BrowserAdapter:
         logger.info("浏览器适配器初始化完成")
 
     async def start_session(self) -> None:
-        """启动浏览器会�?""
+        """启动浏览器会话"""
         try:
-            # TODO: 集成 browser-use �?BrowserSession
+            # TODO: 集成 browser-use 的 BrowserSession
             # from browser_use.browser.session import BrowserSession
             # self._session = await BrowserSession.create(...)
 
-            logger.info("浏览器会话启动成�?)
+            logger.info("浏览器会话启动成功")
         except Exception as e:
-            logger.error(f"浏览器会话启动失�? {e}")
+            logger.error(f"浏览器会话启动失败: {e}")
             raise
 
     async def close_session(self) -> None:
-        """关闭浏览器会�?""
+        """关闭浏览器会话"""
         if self._session:
             try:
                 # TODO: 关闭 browser-use 会话
                 # await self._session.close()
                 logger.info("浏览器会话已关闭")
             except Exception as e:
-                logger.error(f"关闭浏览器会话失�? {e}")
+                logger.error(f"关闭浏览器会话失败: {e}")
                 raise
 
     async def navigate(self, url: str) -> None:
         """
-        导航到指�?URL
+        导航到指定 URL
 
         Args:
             url: 目标 URL
@@ -66,7 +66,7 @@ class BrowserAdapter:
 
         try:
             # TODO: 使用 browser-use 导航
-            logger.info(f"导航�? {url}")
+            logger.info(f"导航到: {url}")
         except Exception as e:
             logger.error(f"导航失败: {e}")
             raise
@@ -76,7 +76,7 @@ class BrowserAdapter:
         获取当前页面 URL
 
         Returns:
-            当前页面�?URL
+            当前页面的 URL
         """
         if not self._session:
             raise RuntimeError("浏览器会话未启动")
@@ -103,9 +103,8 @@ class BrowserAdapter:
 
         try:
             # TODO: 实现截图功能
-            logger.info(f"截图保存�? {path}")
+            logger.info(f"截图保存到: {path}")
             return path or ""
         except Exception as e:
             logger.error(f"截图失败: {e}")
             raise
-

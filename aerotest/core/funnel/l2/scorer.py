@@ -1,6 +1,6 @@
-"""评分�?
+"""评分器
 
-计算元素匹配的综合得�?
+计算元素匹配的综合得分
 """
 
 from typing import Optional
@@ -16,10 +16,10 @@ logger = get_logger("aerotest.funnel.l2.scorer")
 
 
 class Scorer:
-    """评分�?
+    """评分器
     
     计算元素与槽位的综合匹配得分，整合：
-    - 属性匹配得�?
+    - 属性匹配得分
     - 文本匹配得分
     - 类型匹配得分
     
@@ -71,9 +71,9 @@ class Scorer:
                 type_bonus = 0.2
                 match_reasons.append(f"类型匹配: {slot.target_type.value}")
         
-        # 2. 属性匹�?
+        # 2. 属性匹配
         if slot.keywords:
-            # 遍历常用属�?
+            # 遍历常用属性
             for attr in ["id", "name", "placeholder", "aria-label", "title", "innerText"]:
                 attr_value = element.attributes.get(attr)
                 if not attr_value:
@@ -83,7 +83,7 @@ class Scorer:
                 text_score = self.text_matcher.match_any(attr_value, slot.keywords)
                 
                 if text_score > 0.5:
-                    # 应用属性权�?
+                    # 应用属性权重
                     attr_weight = self.attribute_matcher.get_attribute_weight(attr)
                     weighted_score = text_score * attr_weight
                     
@@ -94,7 +94,7 @@ class Scorer:
         
         # 3. 计算总分
         if matched_attributes:
-            # 取最高的 2 个属性得�?
+            # 取最高的 2 个属性得分
             sorted_scores = sorted(matched_attributes.values(), reverse=True)
             top_scores = sorted_scores[:2]
             total_score = sum(top_scores) / len(top_scores) if top_scores else 0.0
@@ -125,7 +125,7 @@ class Scorer:
         Args:
             elements: 元素列表
             slot: 动作槽位
-            top_n: 返回�?N 个结�?
+            top_n: 返回前 N 个结果
             
         Returns:
             排序后的匹配结果列表
@@ -140,6 +140,5 @@ class Scorer:
         # 排序
         results.sort(key=lambda x: x.score, reverse=True)
         
-        logger.info(f"评分完成: {len(results)} 个候选，返回�?{top_n} �?)
+        logger.info(f"评分完成: {len(results)} 个候选，返回前 {top_n} 个")
         return results[:top_n]
-

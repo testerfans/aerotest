@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from aerotest.config import get_settings
 from aerotest.db.base import Base
 
-# 导入所有模�?
+# 导入所有模型
 from aerotest.db.models import TestCase, TestResult  # noqa
 
 # Alembic Config 对象
@@ -23,7 +23,7 @@ if config.config_file_name is not None:
 # 设置 metadata
 target_metadata = Base.metadata
 
-# 从设置中获取数据�?URL
+# 从设置中获取数据库 URL
 settings = get_settings()
 config.set_main_option("sqlalchemy.url", settings.database_url)
 
@@ -73,4 +73,3 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
-

@@ -1,4 +1,4 @@
-"""命令行工�?""
+"""命令行工具"""
 
 import asyncio
 
@@ -14,13 +14,13 @@ logger = get_logger("aerotest.cli")
 @click.group()
 @click.version_option(version=__version__)
 def main() -> None:
-    """AeroTest AI - 智能 UI 自动化测试平�?""
+    """AeroTest AI - 智能 UI 自动化测试平台"""
     pass
 
 
 @main.command()
 @click.option("--host", default=None, help="服务器地址")
-@click.option("--port", default=None, type=int, help="服务器端�?)
+@click.option("--port", default=None, type=int, help="服务器端口")
 @click.option("--reload", is_flag=True, help="开启热重载")
 def serve(host: str | None, port: int | None, reload: bool) -> None:
     """启动 API 服务"""
@@ -47,7 +47,7 @@ def run(test_case_file: str) -> None:
 
         client = AeroTestClient()
 
-        # TODO: 从文件加载测试用�?
+        # TODO: 从文件加载测试用例
         # test_case = load_test_case(test_case_file)
         # result = await client.execute_test(test_case)
 
@@ -58,11 +58,11 @@ def run(test_case_file: str) -> None:
 
 @main.command()
 def init() -> None:
-    """初始化项目配�?""
+    """初始化项目配置"""
     import shutil
     from pathlib import Path
 
-    logger.info("初始�?AeroTest AI 项目")
+    logger.info("初始化 AeroTest AI 项目")
 
     # 创建 .env 文件
     env_example = Path(".env.example")
@@ -70,17 +70,17 @@ def init() -> None:
 
     if not env_file.exists() and env_example.exists():
         shutil.copy(env_example, env_file)
-        logger.info("已创�?.env 文件")
+        logger.info("已创建 .env 文件")
     else:
-        logger.info(".env 文件已存�?)
+        logger.info(".env 文件已存在")
 
-    # 创建必要的目�?
+    # 创建必要的目录
     dirs = ["logs", "data/knowledge_base", "data/reports"]
     for dir_path in dirs:
         Path(dir_path).mkdir(parents=True, exist_ok=True)
-        logger.info(f"已创建目�? {dir_path}")
+        logger.info(f"已创建目录: {dir_path}")
 
-    logger.info("初始化完�?)
+    logger.info("初始化完成")
 
 
 @main.command()
@@ -92,7 +92,7 @@ def db_init() -> None:
         from aerotest.db.base import Base
         from aerotest.db.session import engine
 
-        # 导入所有模�?
+        # 导入所有模型
         from aerotest.db.models import TestCase, TestResult  # noqa
 
         async with engine.begin() as conn:
@@ -105,4 +105,3 @@ def db_init() -> None:
 
 if __name__ == "__main__":
     main()
-

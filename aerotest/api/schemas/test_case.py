@@ -14,8 +14,8 @@ class TestCaseCreate(BaseModel):
     description: Optional[str] = Field(default=None, description="测试用例描述")
     steps: List[TestStep] = Field(description="测试步骤列表")
     tags: Optional[List[str]] = Field(default=None, description="标签")
-    priority: Optional[int] = Field(default=3, description="优先�?(1-5)")
-    metadata: Optional[Dict[str, Any]] = Field(default=None, description="额外元数�?)
+    priority: Optional[int] = Field(default=3, description="优先级(1-5)")
+    metadata: Optional[Dict[str, Any]] = Field(default=None, description="额外元数据")
 
 
 class TestCaseResponse(BaseModel):
@@ -26,7 +26,6 @@ class TestCaseResponse(BaseModel):
     description: Optional[str] = Field(default=None, description="测试用例描述")
     steps: List[TestStep] = Field(description="测试步骤列表")
     tags: List[str] = Field(description="标签")
-    priority: int = Field(description="优先�?(1-5)")
+    priority: int = Field(description="优先级(1-5)")
     created_at: Optional[str] = Field(default=None, description="创建时间")
     updated_at: Optional[str] = Field(default=None, description="更新时间")
-

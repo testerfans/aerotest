@@ -1,6 +1,6 @@
-"""类型匹配�?
+"""类型匹配器
 
-基于元素类型和角色筛选元�?
+基于元素类型和角色筛选元素
 """
 
 from typing import Optional
@@ -13,30 +13,30 @@ logger = get_logger("aerotest.funnel.l2.type")
 
 
 class TypeMatcher:
-    """类型匹配�?
+    """类型匹配器
     
-    基于元素类型筛选，包括�?
-    - 标签�?(tag_name)
+    基于元素类型筛选，包括：
+    - 标签名(tag_name)
     - 元素类型 (ElementType)
     - ARIA role
-    - input type 属�?
+    - input type 属性
     
     Example:
         ```python
         matcher = TypeMatcher()
         
-        # 按标签名筛�?
+        # 按标签名筛选
         buttons = matcher.match_by_tag(elements, "button")
         
-        # 按元素类型筛�?
+        # 按元素类型筛选
         buttons = matcher.match_by_type(elements, ElementType.BUTTON)
         
-        # �?role 筛�?
+        # 按 role 筛选
         buttons = matcher.match_by_role(elements, "button")
         ```
     """
     
-    # 元素类型到标签名的映�?
+    # 元素类型到标签名的映射
     TYPE_TO_TAGS = {
         ElementType.BUTTON: ["button", "input"],
         ElementType.INPUT: ["input", "textarea"],
@@ -50,7 +50,7 @@ class TypeMatcher:
         ElementType.LABEL: ["label"],
     }
     
-    # input 类型筛选条�?
+    # input 类型筛选条件
     INPUT_TYPE_CONDITIONS = {
         ElementType.BUTTON: ["button", "submit", "reset"],
         ElementType.INPUT: ["text", "password", "email", "tel", "url", "search"],
@@ -68,14 +68,14 @@ class TypeMatcher:
         tag_name: str,
     ) -> list[EnhancedDOMTreeNode]:
         """
-        按标签名筛�?
+        按标签名筛选
         
         Args:
             elements: 元素列表
-            tag_name: 标签�?
+            tag_name: 标签名
             
         Returns:
-            匹配的元素列�?
+            匹配的元素列表
         """
         tag_lower = tag_name.lower()
         matched = [
@@ -83,7 +83,7 @@ class TypeMatcher:
             if elem.tag_name and elem.tag_name.lower() == tag_lower
         ]
         
-        logger.debug(f"标签筛�? {tag_name} -> {len(matched)} 个元�?)
+        logger.debug(f"标签筛选: {tag_name} -> {len(matched)} 个元素")
         return matched
     
     def match_by_type(
@@ -92,14 +92,14 @@ class TypeMatcher:
         element_type: ElementType,
     ) -> list[EnhancedDOMTreeNode]:
         """
-        按元素类型筛�?
+        按元素类型筛选
         
         Args:
             elements: 元素列表
             element_type: 元素类型
             
         Returns:
-            匹配的元素列�?
+            匹配的元素列表
         """
         # 获取可能的标签名
         possible_tags = self.TYPE_TO_TAGS.get(element_type, [])
@@ -119,7 +119,7 @@ class TypeMatcher:
             if tag_lower not in possible_tags:
                 continue
             
-            # 对于 input 元素，需要检�?type 属�?
+            # 对于 input 元素，需要检查 type 属性
             if tag_lower == "input":
                 input_type = elem.attributes.get("type", "text").lower()
                 type_conditions = self.INPUT_TYPE_CONDITIONS.get(element_type, [])
@@ -129,7 +129,7 @@ class TypeMatcher:
             
             matched.append(elem)
         
-        logger.debug(f"类型筛�? {element_type.value} -> {len(matched)} 个元�?)
+        logger.debug(f"类型筛选: {element_type.value} -> {len(matched)} 个元素")
         return matched
     
     def match_by_role(
@@ -138,14 +138,14 @@ class TypeMatcher:
         role: str,
     ) -> list[EnhancedDOMTreeNode]:
         """
-        �?ARIA role 筛�?
+        按 ARIA role 筛选
         
         Args:
             elements: 元素列表
             role: ARIA role
             
         Returns:
-            匹配的元素列�?
+            匹配的元素列表
         """
         role_lower = role.lower()
         matched = [
@@ -153,7 +153,7 @@ class TypeMatcher:
             if elem.attributes.get("role", "").lower() == role_lower
         ]
         
-        logger.debug(f"role 筛�? {role} -> {len(matched)} 个元�?)
+        logger.debug(f"role 筛选: {role} -> {len(matched)} 个元素")
         return matched
     
     def is_type_match(
@@ -182,9 +182,8 @@ class TypeMatcher:
 _type_matcher = None
 
 def get_type_matcher() -> TypeMatcher:
-    """获取类型匹配器单�?""
+    """获取类型匹配器单例"""
     global _type_matcher
     if _type_matcher is None:
         _type_matcher = TypeMatcher()
     return _type_matcher
-

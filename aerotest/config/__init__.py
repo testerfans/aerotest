@@ -1,4 +1,4 @@
-"""配置模块"""
+"""éç½®æ¨¡å"""
 
 from aerotest.config.settings import Settings, get_settings
 

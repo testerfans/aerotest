@@ -1,6 +1,6 @@
 """OODA 循环数据类型
 
-定义 OODA 循环中的所有核心数据结�?
+定义 OODA 循环中的所有核心数据结的
 """
 
 from dataclasses import dataclass, field
@@ -29,24 +29,24 @@ class ActionType(str, Enum):
 
 
 class ActionStatus(str, Enum):
-    """操作状�?""
+    """操作状的""
 
-    PENDING = "pending"  # 待执�?
-    RUNNING = "running"  # 执行�?
+    PENDING = "pending"  # 待执的
+    RUNNING = "running"  # 执行的
     SUCCESS = "success"  # 成功
     FAILED = "failed"  # 失败
     SKIPPED = "skipped"  # 跳过
-    RETRY = "retry"  # 重试�?
+    RETRY = "retry"  # 重试的
 
 
 @dataclass
 class Observation:
-    """观察（Observe�?
+    """观察（Observe的
     
     从当前页面状态收集的信息
     """
 
-    # DOM �?
+    # DOM 的
     dom_tree: Optional[EnhancedDOMTreeNode] = None
 
     # 页面信息
@@ -57,10 +57,10 @@ class Observation:
     # 可见元素
     visible_elements: List[EnhancedDOMTreeNode] = field(default_factory=list)
 
-    # 可交互元�?
+    # 可交互元的
     interactive_elements: List[EnhancedDOMTreeNode] = field(default_factory=list)
 
-    # 页面截图（Base64�?
+    # 页面截图（Base64的
     screenshot: Optional[str] = None
 
     # 观察时间
@@ -72,7 +72,7 @@ class Observation:
 
 @dataclass
 class Orientation:
-    """定向（Orient�?
+    """定向（Orient的
     
     对观察到的信息进行分析和理解
     """
@@ -80,19 +80,19 @@ class Orientation:
     # 当前步骤
     current_step: Optional["TestStep"] = None
 
-    # 提取的槽位（L1�?
+    # 提取的槽位（L1的
     action_slot: Optional[Any] = None  # ActionSlot from L1
 
-    # 候选元素（L2-L5�?
+    # 候选元素（L2-L5的
     candidate_elements: List[MatchResult] = field(default_factory=list)
 
-    # 最佳匹�?
+    # 最佳匹的
     best_match: Optional[MatchResult] = None
 
     # 匹配策略
     strategy: str = ""  # L1, L2, L3, L4, L5
 
-    # 置信�?
+    # 置信的
     confidence: float = 0.0
 
     # 分析时间
@@ -104,9 +104,9 @@ class Orientation:
 
 @dataclass
 class Decision:
-    """决策（Decide�?
+    """决策（Decide的
     
-    基于分析结果做出的执行决�?
+    基于分析结果做出的执行决的
     """
 
     # 决策类型
@@ -124,7 +124,7 @@ class Decision:
     # 决策原因
     reason: str = ""
 
-    # 备选方�?
+    # 备选方的
     fallback_decisions: List["Decision"] = field(default_factory=list)
 
     # 决策时间
@@ -136,7 +136,7 @@ class Decision:
 
 @dataclass
 class Action:
-    """行动（Act�?
+    """行动（Act的
     
     实际执行的操作和结果
     """
@@ -150,7 +150,7 @@ class Action:
     # 操作参数
     parameters: Dict[str, Any] = field(default_factory=dict)
 
-    # 执行状�?
+    # 执行状的
     status: ActionStatus = ActionStatus.PENDING
 
     # 执行结果
@@ -165,7 +165,7 @@ class Action:
     # 执行耗时（毫秒）
     duration_ms: float = 0.0
 
-    # 开始时�?
+    # 开始时的
     start_time: Optional[datetime] = None
 
     # 结束时间
@@ -185,13 +185,13 @@ class TestStep:
     # 步骤 ID
     step_id: str
 
-    # 步骤描述（自然语言�?
+    # 步骤描述（自然语言的
     description: str
 
     # 步骤类型
     action_type: ActionType
 
-    # 期望值（用于断言�?
+    # 期望值（用于断言的
     expected_value: Optional[Any] = None
 
     # OODA 循环数据
@@ -200,7 +200,7 @@ class TestStep:
     decision: Optional[Decision] = None
     action: Optional[Action] = None
 
-    # 步骤状�?
+    # 步骤状的
     status: ActionStatus = ActionStatus.PENDING
 
     # 错误信息
@@ -209,7 +209,7 @@ class TestStep:
     # 执行耗时（毫秒）
     duration_ms: float = 0.0
 
-    # 开始时�?
+    # 开始时的
     start_time: Optional[datetime] = None
 
     # 结束时间
@@ -223,7 +223,7 @@ class TestStep:
 class TestCase:
     """测试用例
     
-    包含多个测试步骤的完整测试用�?
+    包含多个测试步骤的完整测试用的
     """
 
     # 用例 ID
@@ -238,10 +238,10 @@ class TestCase:
     # 测试步骤
     steps: List[TestStep] = field(default_factory=list)
 
-    # 用例状�?
+    # 用例状的
     status: ActionStatus = ActionStatus.PENDING
 
-    # 执行上下�?
+    # 执行上下的
     context: Dict[str, Any] = field(default_factory=dict)
 
     # 环境配置
@@ -250,7 +250,7 @@ class TestCase:
     # 执行耗时（毫秒）
     duration_ms: float = 0.0
 
-    # 开始时�?
+    # 开始时的
     start_time: Optional[datetime] = None
 
     # 结束时间
@@ -262,9 +262,9 @@ class TestCase:
 
 @dataclass
 class ExecutionContext:
-    """执行上下�?
+    """执行上下的
     
-    用于�?OODA 循环中传递状态和依赖
+    用于的OODA 循环中传递状态和依赖
     """
 
     # CDP Session（如果需要）
@@ -296,7 +296,7 @@ class ExecutionResult:
     # 是否成功
     success: bool
 
-    # 状�?
+    # 状的
     status: ActionStatus
 
     # 结果数据

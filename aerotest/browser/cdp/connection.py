@@ -1,6 +1,6 @@
 """CDP 连接管理
 
-管理�?Chrome DevTools Protocol �?WebSocket 连接
+管理与 Chrome DevTools Protocol 的 WebSocket 连接
 
 来源: 简化自 browser-use v0.11.2
 """
@@ -19,10 +19,10 @@ logger = get_logger("aerotest.cdp.connection")
 
 
 class CDPConnection:
-    """CDP WebSocket 连接管理�?
+    """CDP WebSocket 连接管理器
     
-    负责�?
-    - 连接�?Chrome DevTools Protocol
+    负责：
+    - 连接到 Chrome DevTools Protocol
     - 管理 WebSocket 生命周期
     - 获取可用的浏览器目标（页面）
     
@@ -39,7 +39,7 @@ class CDPConnection:
     
     def __init__(self, config: CDPConnectionConfig):
         """
-        初始�?CDP 连接
+        初始化 CDP 连接
         
         Args:
             config: CDP 连接配置
@@ -48,11 +48,11 @@ class CDPConnection:
         self.client: Optional[CDPClient] = None
         self._connected = False
         
-        logger.debug(f"初始�?CDP 连接: {config.http_url}")
+        logger.debug(f"初始化 CDP 连接: {config.http_url}")
     
     async def connect(self) -> CDPClient:
         """
-        连接�?Chrome DevTools Protocol
+        连接到 Chrome DevTools Protocol
         
         Returns:
             CDPClient 实例
@@ -67,13 +67,13 @@ class CDPConnection:
         try:
             logger.info(f"正在连接 CDP: {self.config.http_url}")
             
-            # 检�?CDP 是否可用
+            # 检查 CDP 是否可用
             await self._check_cdp_availability()
             
-            # 获取浏览�?WebSocket URL
+            # 获取浏览器的 WebSocket URL
             ws_url = await self._get_browser_ws_url()
             
-            # 创建 CDP 客户�?
+            # 创建 CDP 客户端
             self.client = CDPClient()
             
             # 连接到浏览器
@@ -83,16 +83,16 @@ class CDPConnection:
             )
             
             self._connected = True
-            logger.info("�?CDP 连接成功")
+            logger.info("✅ CDP 连接成功")
             
             return self.client
             
         except asyncio.TimeoutError as e:
             logger.error(f"CDP 连接超时: {e}")
-            raise ConnectionError(f"连接超时: {self.config.timeout}�?) from e
+            raise ConnectionError(f"连接超时: {self.config.timeout}秒") from e
         except Exception as e:
             logger.error(f"CDP 连接失败: {e}")
-            raise ConnectionError(f"无法连接�?CDP: {e}") from e
+            raise ConnectionError(f"无法连接到 CDP: {e}") from e
     
     async def disconnect(self):
         """断开 CDP 连接"""
@@ -105,10 +105,10 @@ class CDPConnection:
             await self.client.disconnect()
             self._connected = False
             self.client = None
-            logger.info("�?CDP 已断开")
+            logger.info("✅ CDP 已断开")
             
         except Exception as e:
-            logger.error(f"断开 CDP 连接时出�? {e}")
+            logger.error(f"断开 CDP 连接时出错: {e}")
             self._connected = False
             self.client = None
     
@@ -143,7 +143,7 @@ class CDPConnection:
                     )
                     targets.append(target)
             
-            logger.debug(f"找到 {len(targets)} �?{target_type} 类型的目�?)
+            logger.debug(f"找到 {len(targets)} 个 {target_type} 类型的目标")
             return targets
             
         except Exception as e:
@@ -160,16 +160,16 @@ class CDPConnection:
         targets = await self.get_targets(target_type="page")
         
         if not targets:
-            logger.warning("没有找到可用的页面目�?)
+            logger.warning("没有找到可用的页面目标")
             return None
         
-        # 优先选择�?about:blank 的页�?
+        # 优先选择非 about:blank 的页面
         for target in targets:
             if target.url != "about:blank":
                 logger.debug(f"选择目标: {target.title} ({target.url})")
                 return target
         
-        # 如果都是 about:blank，返回第一�?
+        # 如果都是 about:blank，返回第一个
         logger.debug(f"选择目标: {targets[0].title} (默认)")
         return targets[0]
     
@@ -199,16 +199,16 @@ class CDPConnection:
                 attached=True,
             )
             
-            logger.info(f"�?创建新页�? {target.target_id}")
+            logger.info(f"✅ 创建新页面: {target.target_id}")
             return target
             
         except Exception as e:
-            logger.error(f"创建新页面失�? {e}")
+            logger.error(f"创建新页面失败: {e}")
             return None
     
     async def close_target(self, target_id: str) -> bool:
         """
-        关闭指定的目�?
+        关闭指定的目标
         
         Args:
             target_id: 目标 ID
@@ -223,7 +223,7 @@ class CDPConnection:
                 response = await client.get(close_url)
                 response.raise_for_status()
             
-            logger.info(f"�?关闭目标: {target_id}")
+            logger.info(f"✅ 关闭目标: {target_id}")
             return True
             
         except Exception as e:
@@ -231,7 +231,7 @@ class CDPConnection:
             return False
     
     async def _check_cdp_availability(self):
-        """检�?CDP 是否可用"""
+        """检查 CDP 是否可用"""
         try:
             url = f"{self.config.http_url}/json/version"
             
@@ -269,7 +269,7 @@ class CDPConnection:
             if not ws_url:
                 raise ValueError("无法获取 WebSocket URL")
             
-            logger.debug(f"浏览�?WebSocket URL: {ws_url}")
+            logger.debug(f"浏览器 WebSocket URL: {ws_url}")
             return ws_url
             
         except Exception as e:
@@ -277,7 +277,7 @@ class CDPConnection:
     
     @property
     def is_connected(self) -> bool:
-        """是否已连�?""
+        """是否已连接"""
         return self._connected and self.client is not None
     
     async def __aenter__(self):
@@ -288,4 +288,3 @@ class CDPConnection:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """异步上下文管理器出口"""
         await self.disconnect()
-

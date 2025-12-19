@@ -1,9 +1,9 @@
 """DOM 视图数据结构
 
-核心数据类型和类定义，用于表示增强的 DOM �?
+核心数据类型和类定义，用于表示增强的 DOM 树
 
 来源: browser-use v0.11.2
-改�? 移除外部依赖，适配 AeroTest 架构
+改动: 移除外部依赖，适配 AeroTest 架构
 """
 
 import hashlib
@@ -15,7 +15,7 @@ from uuid import uuid4
 from aerotest.browser.dom.cdp_types import AXPropertyName, ShadowRootType, SessionID, TargetID
 from aerotest.browser.dom.utils import cap_text_length
 
-# 序列化器默认包含的属�?
+# 序列化器默认包含的属性
 DEFAULT_INCLUDE_ATTRIBUTES = [
     'title', 'type', 'checked', 'id', 'name', 'role', 'value', 'placeholder',
     'data-date-format', 'alt', 'aria-label', 'aria-expanded', 'data-state',
@@ -27,7 +27,7 @@ DEFAULT_INCLUDE_ATTRIBUTES = [
     'valuetext', 'level', 'busy', 'live', 'ax_name',
 ]
 
-# 静态属性（用于哈希计算�?
+# 静态属性（用于哈希计算）
 STATIC_ATTRIBUTES = {
     'class', 'id', 'name', 'type', 'placeholder', 'aria-label', 'title',
     'role', 'data-testid', 'data-test', 'data-cy', 'data-selenium',
@@ -37,7 +37,7 @@ STATIC_ATTRIBUTES = {
     'src', 'lang', 'pseudo', 'aria-valuemin', 'aria-valuemax', 'aria-valuenow',
 }
 
-# 动态类模式（排除在稳定哈希之外�?
+# 动态类模式（排除在稳定哈希之外）
 DYNAMIC_CLASS_PATTERNS = frozenset({
     'focus', 'hover', 'active', 'selected', 'disabled', 'animation',
     'transition', 'loading', 'open', 'closed', 'expanded', 'collapsed',
@@ -48,20 +48,20 @@ DYNAMIC_CLASS_PATTERNS = frozenset({
 
 class MatchLevel(Enum):
     """元素匹配严格程度级别"""
-    EXACT = 1      # 完整哈希，包含所有属�?
-    STABLE = 2     # 过滤动态类的哈�?
-    XPATH = 3      # XPath 字符串比�?
+    EXACT = 1      # 完整哈希，包含所有属性
+    STABLE = 2     # 过滤动态类的哈希
+    XPATH = 3      # XPath 字符串比较
 
 
 def filter_dynamic_classes(class_str: str | None) -> str:
     """
-    移除动态状态类，保留语�?识别�?
+    移除动态状态类，保留语义识别类
     
     Args:
         class_str: class 属性字符串
     
     Returns:
-        过滤后的类字符串（已排序�?
+        过滤后的类字符串（已排序）
     """
     if not class_str:
         return ''
@@ -71,7 +71,7 @@ def filter_dynamic_classes(class_str: str | None) -> str:
 
 
 class NodeType(int, Enum):
-    """DOM 节点类型（基�?DOM 规范�?""
+    """DOM 节点类型（基于 DOM 规范）"""
     ELEMENT_NODE = 1
     ATTRIBUTE_NODE = 2
     TEXT_NODE = 3
@@ -95,7 +95,7 @@ class DOMRect:
     height: float
 
     def to_dict(self) -> dict[str, Any]:
-        """转换为字�?""
+        """转换为字典"""
         return {
             'x': self.x,
             'y': self.y,
@@ -104,29 +104,29 @@ class DOMRect:
         }
 
     def __json__(self) -> dict:
-        """JSON 序列�?""
+        """JSON 序列化"""
         return self.to_dict()
 
 
 @dataclass(slots=True)
 class PropagatingBounds:
-    """跟踪从父元素传播的边界以过滤子元�?""
-    tag: str              # 开始传播的标签�?a' �?'button'�?
-    bounds: DOMRect       # 边界�?
+    """跟踪从父元素传播的边界以过滤子元素"""
+    tag: str              # 开始传播的标签（如 'a' 或 'button'）
+    bounds: DOMRect       # 边界框
     node_id: int          # 节点 ID（用于调试）
-    depth: int            # 树中的深度（用于调试�?
+    depth: int            # 树中的深度（用于调试）
 
 
 @dataclass(slots=True)
 class EnhancedAXProperty:
-    """增强的可访问性属�?""
+    """增强的可访问性属性"""
     name: AXPropertyName
     value: str | bool | None
 
 
 @dataclass(slots=True)
 class EnhancedAXNode:
-    """增强的可访问性节�?""
+    """增强的可访问性节点"""
     ax_node_id: str
     ignored: bool
     role: str | None
@@ -138,14 +138,14 @@ class EnhancedAXNode:
 
 @dataclass(slots=True)
 class EnhancedSnapshotNode:
-    """�?DOMSnapshot 提取的快照数�?""
+    """从 DOMSnapshot 提取的快照数据"""
     is_clickable: bool | None
     cursor_style: str | None
     bounds: DOMRect | None
-    """文档坐标（原�?= 页面左上角，忽略当前滚动�?""
+    """文档坐标（原点 = 页面左上角，忽略当前滚动）"""
     
     clientRects: DOMRect | None
-    """视口坐标（原�?= 可见滚动端口左上角）"""
+    """视口坐标（原点 = 可见滚动端口左上角）"""
     
     scrollRects: DOMRect | None
     """元素的可滚动区域"""
@@ -157,15 +157,15 @@ class EnhancedSnapshotNode:
     """绘制顺序"""
     
     stacking_contexts: int | None
-    """堆叠上下�?""
+    """堆叠上下文"""
 
 
 @dataclass(slots=True)
 class EnhancedDOMTreeNode:
     """
-    增强�?DOM 树节点，包含来自 AX、DOM �?Snapshot 树的信息
+    增强的 DOM 树节点，包含来自 AX、DOM 和 Snapshot 树的信息
     
-    主要基于 DOM 节点类型，增强了 AX �?Snapshot 树的数据
+    主要基于 DOM 节点类型，增强了 AX 和 Snapshot 树的数据
     """
     
     # ===== DOM 节点数据 =====
@@ -199,24 +199,24 @@ class EnhancedDOMTreeNode:
     # ===== Snapshot 节点数据 =====
     snapshot_node: EnhancedSnapshotNode | None
     
-    # 复合控件子组件信�?
+    # 复合控件子组件信息
     _compound_children: list[dict[str, Any]] = field(default_factory=list)
     
     uuid: str = field(default_factory=lambda: str(uuid4()))
 
     @property
     def parent(self) -> 'EnhancedDOMTreeNode | None':
-        """父节�?""
+        """父节点"""
         return self.parent_node
 
     @property
     def children(self) -> list['EnhancedDOMTreeNode']:
-        """子节�?""
+        """子节点"""
         return self.children_nodes or []
 
     @property
     def children_and_shadow_roots(self) -> list['EnhancedDOMTreeNode']:
-        """返回所有子节点，包�?shadow roots"""
+        """返回所有子节点，包括 shadow roots"""
         children = list(self.children_nodes) if self.children_nodes else []
         if self.shadow_roots:
             children.extend(self.shadow_roots)
@@ -224,12 +224,12 @@ class EnhancedDOMTreeNode:
 
     @property
     def tag_name(self) -> str:
-        """标签名（小写�?""
+        """标签名（小写）"""
         return self.node_name.lower()
 
     @property
     def xpath(self) -> str:
-        """生成�?DOM 节点�?XPath，在 shadow 边界�?iframe 处停�?""
+        """生成从 DOM 节点的 XPath，在 shadow 边界或 iframe 处停止"""
         segments = []
         current_element = self
 
@@ -242,7 +242,7 @@ class EnhancedDOMTreeNode:
                 current_element = current_element.parent_node
                 continue
 
-            # 只在遇到 iframe 时停�?
+            # 只在遇到 iframe 时停止
             if current_element.parent_node and current_element.parent_node.node_name.lower() == 'iframe':
                 break
 
@@ -256,7 +256,7 @@ class EnhancedDOMTreeNode:
         return '/'.join(segments)
 
     def _get_element_position(self, element: 'EnhancedDOMTreeNode') -> int:
-        """获取元素在具有相同标签名的兄弟元素中的位�?""
+        """获取元素在具有相同标签名的兄弟元素中的位置"""
         if not element.parent_node or not element.parent_node.children_nodes:
             return 0
 
@@ -269,12 +269,12 @@ class EnhancedDOMTreeNode:
             return 0
 
         try:
-            return same_tag_siblings.index(element) + 1  # XPath �?1 索引�?
+            return same_tag_siblings.index(element) + 1  # XPath 从 1 索引
         except ValueError:
             return 0
 
     def get_all_children_text(self, max_depth: int = -1) -> str:
-        """获取所有子节点的文本内�?""
+        """获取所有子节点的文本内容"""
         text_parts = []
 
         def collect_text(node: EnhancedDOMTreeNode, current_depth: int) -> None:
@@ -291,7 +291,7 @@ class EnhancedDOMTreeNode:
         return '\n'.join(text_parts).strip()
 
     def get_meaningful_text_for_llm(self) -> str:
-        """获取 LLM 实际看到的有意义的文本内�?""
+        """获取 LLM 实际看到的有意义的文本内容"""
         meaningful_text = ''
         if hasattr(self, 'attributes') and self.attributes:
             # 优先级顺序：value, aria-label, title, placeholder, alt, 文本内容
@@ -300,7 +300,7 @@ class EnhancedDOMTreeNode:
                     meaningful_text = self.attributes[attr]
                     break
 
-        # 回退到文本内�?
+        # 回退到文本内容
         if not meaningful_text:
             meaningful_text = self.get_all_children_text()
 
@@ -311,7 +311,7 @@ class EnhancedDOMTreeNode:
         """
         增强的滚动检测，结合 CDP 检测和 CSS 分析
         
-        这可以检�?Chrome CDP 可能遗漏的可滚动元素
+        这可以检测 Chrome CDP 可能遗漏的可滚动元素
         """
         if self.is_scrollable:
             return True
@@ -364,7 +364,7 @@ class EnhancedDOMTreeNode:
 
     @property
     def scroll_info(self) -> dict[str, Any] | None:
-        """计算此元素的滚动信息（如果可滚动�?""
+        """计算此元素的滚动信息（如果可滚动）"""
         if not self.is_actually_scrollable or not self.snapshot_node:
             return None
 
@@ -424,7 +424,7 @@ class EnhancedDOMTreeNode:
         }
 
     def get_scroll_info_text(self) -> str:
-        """获取人类可读的滚动信息文�?""
+        """获取人类可读的滚动信息文本"""
         if self.tag_name.lower() == 'iframe':
             if self.content_document:
                 html_element = self._find_html_in_content_document()
@@ -435,7 +435,7 @@ class EnhancedDOMTreeNode:
                     v_pct = int(info.get('vertical_scroll_percentage', 0))
 
                     if pages_below > 0 or pages_above > 0:
-                        return f'scroll: {pages_above:.1f}�?{pages_below:.1f}�?{v_pct}%'
+                        return f'scroll: {pages_above:.1f}↑ {pages_below:.1f}↓ {v_pct}%'
             return 'scroll'
 
         scroll_info = self.scroll_info
@@ -452,7 +452,7 @@ class EnhancedDOMTreeNode:
         return ' '.join(parts)
 
     def _find_html_in_content_document(self) -> 'EnhancedDOMTreeNode | None':
-        """�?iframe 内容文档中查�?HTML 元素"""
+        """从 iframe 内容文档中查找 HTML 元素"""
         if not self.content_document:
             return None
 
@@ -468,7 +468,7 @@ class EnhancedDOMTreeNode:
 
     @property
     def element_hash(self) -> int:
-        """元素哈希�?""
+        """元素哈希值"""
         return hash(self)
 
     def compute_stable_hash(self) -> int:
@@ -515,7 +515,7 @@ class EnhancedDOMTreeNode:
         return int(element_hash[:16], 16)
 
     def _get_parent_branch_path(self) -> list[str]:
-        """获取从根到当前元素的父分支路�?""
+        """获取从根到当前元素的父分支路径"""
         parents: list[EnhancedDOMTreeNode] = []
         current_element: EnhancedDOMTreeNode | None = self
 
@@ -528,7 +528,7 @@ class EnhancedDOMTreeNode:
         return [parent.tag_name for parent in parents]
 
     def __repr__(self) -> str:
-        """字符串表�?""
+        """字符串表示"""
         attributes = ', '.join([f'{k}={v}' for k, v in self.attributes.items()])
         is_scrollable = getattr(self, 'is_scrollable', False)
         num_children = len(self.children_nodes or [])
@@ -566,7 +566,7 @@ class EnhancedDOMTreeNode:
 
 @dataclass(slots=True)
 class SimplifiedNode:
-    """简化的树节点用于优�?""
+    """简化的树节点用于优化"""
     original_node: EnhancedDOMTreeNode
     children: list['SimplifiedNode']
     should_display: bool = True
@@ -578,7 +578,7 @@ class SimplifiedNode:
     is_compound_component: bool = False
 
     def __json__(self) -> dict:
-        """JSON 序列�?""
+        """JSON 序列化"""
         original_node_json = self.original_node.__json__()
         # 移除重复字段
         if 'children_nodes' in original_node_json:
@@ -602,12 +602,12 @@ DOMSelectorMap = dict[int, EnhancedDOMTreeNode]
 
 @dataclass
 class SerializedDOMState:
-    """序列化的 DOM 状�?""
+    """序列化的 DOM 状态"""
     _root: SimplifiedNode | None
     selector_map: DOMSelectorMap
 
     def llm_representation(self, include_attributes: list[str] | None = None) -> str:
-        """LLM 友好的表示形�?""
+        """LLM 友好的表示形式"""
         # 延迟导入避免循环依赖
         from aerotest.browser.dom.serializer import DOMTreeSerializer
 
@@ -635,7 +635,7 @@ class DOMInteractedElement:
     ax_name: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        """转换为字�?""
+        """转换为字典"""
         return {
             'node_id': self.node_id,
             'backend_node_id': self.backend_node_id,
@@ -653,7 +653,7 @@ class DOMInteractedElement:
 
     @classmethod
     def load_from_enhanced_dom_tree(cls, enhanced_dom_tree: EnhancedDOMTreeNode) -> 'DOMInteractedElement':
-        """从增强的 DOM 树加�?""
+        """从增强的 DOM 树加载"""
         ax_name = None
         if enhanced_dom_tree.ax_node and enhanced_dom_tree.ax_node.name:
             ax_name = enhanced_dom_tree.ax_node.name
@@ -672,4 +672,3 @@ class DOMInteractedElement:
             stable_hash=enhanced_dom_tree.compute_stable_hash(),
             ax_name=ax_name,
         )
-

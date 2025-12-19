@@ -1,7 +1,7 @@
 """可点击元素检测器
 
 来源: browser-use v0.11.2
-改�? 移除�?browser_use 的依赖，适配 AeroTest 架构
+改动: 移除对 browser_use 的依赖，适配 AeroTest 架构
 """
 
 from typing import TYPE_CHECKING
@@ -16,58 +16,58 @@ class ClickableElementDetector:
     @staticmethod
     def is_interactive(node: "EnhancedDOMTreeNode") -> bool:
         """
-        检查节点是否可交互/可点�?
+        检查节点是否可交互/可点击
         
         Args:
-            node: 增强�?DOM 树节�?
+            node: 增强的 DOM 树节点
         
         Returns:
-            是否可交�?
+            是否可交互
         """
         from aerotest.browser.dom.views import NodeType
 
-        # 跳过非元素节�?
+        # 跳过非元素节点
         if node.node_type != NodeType.ELEMENT_NODE:
             return False
 
-        # 移除 html �?body 节点
+        # 移除 html 和 body 节点
         if node.tag_name in {"html", "body"}:
             return False
 
-        # IFRAME 元素应该是可交互的，如果它们足够大可能需要滚�?
+        # IFRAME 元素应该是可交互的，如果它们足够大可能需要滚动
         if node.tag_name and node.tag_name.upper() in ("IFRAME", "FRAME"):
             if node.snapshot_node and node.snapshot_node.bounds:
                 width = node.snapshot_node.bounds.width
                 height = node.snapshot_node.bounds.height
-                # 只包含大�?100x100px �?iframe
+                # 只包含大于 100x100px 的 iframe
                 if width > 100 and height > 100:
                     return True
 
-        # 搜索元素检�?
+        # 搜索元素检测
         if node.attributes:
             search_indicators = {
                 "search", "magnify", "glass", "lookup", "find", "query",
                 "search-icon", "search-btn", "search-button", "searchbox",
             }
 
-            # 检�?class 名称
+            # 检查 class 名称
             class_list = node.attributes.get("class", "").lower().split()
             if any(indicator in " ".join(class_list) for indicator in search_indicators):
                 return True
 
-            # 检�?id
+            # 检查 id
             element_id = node.attributes.get("id", "").lower()
             if any(indicator in element_id for indicator in search_indicators):
                 return True
 
-            # 检�?data 属�?
+            # 检查 data 属性
             for attr_name, attr_value in node.attributes.items():
                 if attr_name.startswith("data-") and any(
                     indicator in attr_value.lower() for indicator in search_indicators
                 ):
                     return True
 
-        # 增强的可访问性属性检�?
+        # 增强的可访问性属性检查
         if node.ax_node and node.ax_node.properties:
             for prop in node.ax_node.properties:
                 try:
@@ -83,21 +83,21 @@ class ClickableElementDetector:
                     if prop.name in ["focusable", "editable", "settable"] and prop.value:
                         return True
 
-                    # 交互状态属�?
+                    # 交互状态属性
                     if prop.name in ["checked", "expanded", "pressed", "selected"]:
                         return True
 
-                    # 表单相关交互�?
+                    # 表单相关交互性
                     if prop.name in ["required", "autocomplete"] and prop.value:
                         return True
 
-                    # 具有键盘快捷键的元素是可交互�?
+                    # 具有键盘快捷键的元素是可交互的
                     if prop.name == "keyshortcuts" and prop.value:
                         return True
                 except (AttributeError, ValueError):
                     continue
 
-        # 增强的标签检�?
+        # 增强的标签检查
         interactive_tags = {
             "button", "input", "select", "textarea", "a",
             "details", "summary", "option", "optgroup",
@@ -114,7 +114,7 @@ class ClickableElementDetector:
             if any(attr in node.attributes for attr in interactive_attributes):
                 return True
 
-            # 检查交�?ARIA 角色
+            # 检查交互 ARIA 角色
             if "role" in node.attributes:
                 interactive_roles = {
                     "button", "link", "menuitem", "option", "radio", "checkbox",
@@ -134,7 +134,7 @@ class ClickableElementDetector:
             if node.ax_node.role in interactive_ax_roles:
                 return True
 
-        # 图标和小元素检�?
+        # 图标和小元素检测
         if (
             node.snapshot_node
             and node.snapshot_node.bounds
@@ -146,7 +146,7 @@ class ClickableElementDetector:
                 if any(attr in node.attributes for attr in icon_attributes):
                     return True
 
-        # 最后的后备方案：光标样式表示交互�?
+        # 最后的后备方案：光标样式表示交互性
         if (
             node.snapshot_node
             and node.snapshot_node.cursor_style
@@ -155,4 +155,3 @@ class ClickableElementDetector:
             return True
 
         return False
-

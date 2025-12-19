@@ -1,7 +1,7 @@
-"""OODA 循环模块
+"""OODA å¾ªç¯æ¨¡å
 
-实现完整的 OODA (Observe-Orient-Decide-Act) 循环
-用于 UI 自动化测试的智能执行
+å®ç°å®æ´ç OODA (Observe-Orient-Decide-Act) å¾ªç¯
+ç¨äº UI èªå¨åæµè¯çæºè½æ§è¡
 """
 
 from aerotest.core.ooda.case_executor import CaseExecutor
@@ -20,10 +20,10 @@ from aerotest.core.ooda.types import (
 )
 
 __all__ = [
-    # OODA 引擎
+    # OODA å¼æ
     "OODAEngine",
     "CaseExecutor",
-    # 数据类型
+    # æ°æ®ç±»å
     "Action",
     "ActionType",
     "ActionStatus",

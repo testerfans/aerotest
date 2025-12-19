@@ -22,7 +22,7 @@ async def create_test_case(test_case: TestCaseCreate) -> TestCaseResponse:
         test_case: 测试用例数据
 
     Returns:
-        创建的测试用例信�?
+        创建的测试用例信息
     """
     try:
         logger.info(f"创建测试用例: {test_case.name}")
@@ -91,4 +91,3 @@ async def execute_test_case(test_case_id: str) -> dict:
     except Exception as e:
         logger.error(f"执行测试用例失败: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-

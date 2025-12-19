@@ -16,26 +16,26 @@ class AttributeMatcher:
     """属性匹配器
     
     基于元素的各种属性匹配关键词，不同属性有不同的权重：
-    - placeholder: 最高权�?(1.0) - 最直接的提示信�?
-    - id/name: 高权�?(0.9) - 通常是有意义的标�?
-    - aria-label: 高权�?(0.85) - 无障碍标�?
+    - placeholder: 最高权重(1.0) - 最直接的提示信息
+    - id/name: 高权重(0.9) - 通常是有意义的标识
+    - aria-label: 高权重(0.85) - 无障碍标签
     - title: 中高权重 (0.8) - 提示信息
-    - value: 中权�?(0.7) - 当前�?
+    - value: 中权重(0.7) - 当前值
     - innerText: 中低权重 (0.6) - 可见文本
-    - class: 低权�?(0.4) - 可能包含无关的样式类�?
+    - class: 低权重(0.4) - 可能包含无关的样式类名
     
     Example:
         ```python
         matcher = AttributeMatcher()
         
-        # 单属性匹�?
+        # 单属性匹配
         results = matcher.match_by_attribute(
             elements=dom_elements,
             keywords=["提交", "submit"],
             attribute="id",
         )
         
-        # 多属性匹�?
+        # 多属性匹配
         all_results = matcher.match_by_all_attributes(
             elements=dom_elements,
             keywords=["提交", "submit"],
@@ -43,7 +43,7 @@ class AttributeMatcher:
         ```
     """
     
-    # 属性权重映�?
+    # 属性权重映射
     ATTRIBUTE_WEIGHTS = {
         "placeholder": 1.0,
         "id": 0.9,
@@ -60,7 +60,7 @@ class AttributeMatcher:
     
     def __init__(self):
         """初始化属性匹配器"""
-        logger.debug("属性匹配器初始化完�?)
+        logger.debug("属性匹配器初始化完成")
     
     def match_by_attribute(
         self,
@@ -69,11 +69,11 @@ class AttributeMatcher:
         attribute: str,
     ) -> list[tuple[EnhancedDOMTreeNode, float]]:
         """
-        基于单个属性匹配元�?
+        基于单个属性匹配元素
         
         Args:
             elements: 元素列表
-            keywords: 关键词列�?
+            keywords: 关键词列表
             attribute: 属性名
             
         Returns:
@@ -83,22 +83,22 @@ class AttributeMatcher:
         attribute_weight = self.ATTRIBUTE_WEIGHTS.get(attribute, 0.5)
         
         for element in elements:
-            # 获取属性�?
+            # 获取属性值
             attr_value = self._get_attribute_value(element, attribute)
             
             if not attr_value:
                 continue
             
-            # 匹配关键�?
+            # 匹配关键词
             match_score = self._match_keywords(attr_value, keywords)
             
             if match_score > 0:
-                # 应用属性权�?
+                # 应用属性权重
                 final_score = match_score * attribute_weight
                 results.append((element, final_score))
                 
                 logger.debug(
-                    f"属性匹�? {attribute}='{attr_value[:30]}...' "
+                    f"属性匹配: {attribute}='{attr_value[:30]}...' "
                     f"score={final_score:.2f}"
                 )
         
@@ -111,15 +111,15 @@ class AttributeMatcher:
         attributes: Optional[list[str]] = None,
     ) -> dict[str, list[tuple[EnhancedDOMTreeNode, float]]]:
         """
-        基于所有属性匹配元�?
+        基于所有属性匹配元素
         
         Args:
             elements: 元素列表
-            keywords: 关键词列�?
+            keywords: 关键词列表
             attributes: 要检查的属性列表（None 表示所有属性）
             
         Returns:
-            属性名 -> [(元素, 得分)] 的映�?
+            属性名 -> [(元素, 得分)] 的映射
         """
         if attributes is None:
             attributes = list(self.ATTRIBUTE_WEIGHTS.keys())
@@ -144,16 +144,16 @@ class AttributeMatcher:
         
         Args:
             elements: 元素列表
-            keywords: 关键词列�?
-            top_n: 返回�?N 个结�?
+            keywords: 关键词列表
+            top_n: 返回前 N 个结果
             
         Returns:
-            匹配结果列表（按得分降序�?
+            匹配结果列表（按得分降序）
         """
-        # 匹配所有属�?
+        # 匹配所有属性
         all_matches = self.match_by_all_attributes(elements, keywords)
         
-        # 聚合每个元素的得�?
+        # 聚合每个元素的得分
         element_scores: dict[int, dict] = {}
         
         for attribute, matches in all_matches.items():
@@ -181,10 +181,10 @@ class AttributeMatcher:
                     if reason not in element_scores[node_id]["match_reasons"]:
                         element_scores[node_id]["match_reasons"].append(reason)
         
-        # 转换�?MatchResult
+        # 转换为 MatchResult
         results = []
         for data in element_scores.values():
-            # 归一化得分（避免超过 1.0�?
+            # 归一化得分（避免超过 1.0）
             normalized_score = min(1.0, data["total_score"])
             
             result = MatchResult(
@@ -196,7 +196,7 @@ class AttributeMatcher:
             )
             results.append(result)
         
-        # 排序并返�?Top-N
+        # 排序并返回 Top-N
         results.sort(key=lambda x: x.score, reverse=True)
         return results[:top_n]
     
@@ -206,14 +206,14 @@ class AttributeMatcher:
         attribute: str,
     ) -> Optional[str]:
         """
-        获取元素的属性�?
+        获取元素的属性值
         
         Args:
             element: DOM 元素
             attribute: 属性名
             
         Returns:
-            属性�?
+            属性值
         """
         # 特殊处理 innerText
         if attribute == "innerText":
@@ -223,7 +223,7 @@ class AttributeMatcher:
         if attribute == "class":
             return element.attributes.get("class", "")
         
-        # 其他属�?
+        # 其他属性
         return element.attributes.get(attribute)
     
     def _match_keywords(
@@ -232,11 +232,11 @@ class AttributeMatcher:
         keywords: list[str],
     ) -> float:
         """
-        匹配关键�?
+        匹配关键词
         
         Args:
             text: 要匹配的文本
-            keywords: 关键词列�?
+            keywords: 关键词列表
             
         Returns:
             匹配得分 (0.0-1.0)
@@ -259,7 +259,7 @@ class AttributeMatcher:
             
             # 2. 完整包含匹配
             if keyword_lower in text_lower:
-                # 计算覆盖�?
+                # 计算覆盖率
                 coverage = len(keyword_lower) / len(text_lower)
                 score = 0.7 + coverage * 0.3  # 0.7-1.0
                 max_score = max(max_score, score)
@@ -272,16 +272,16 @@ class AttributeMatcher:
     
     def _partial_match(self, text: str, keyword: str) -> bool:
         """
-        部分匹配（检查是否包含关键词的一部分�?
+        部分匹配（检查是否包含关键词的一部分）
         
         Args:
             text: 文本
-            keyword: 关键�?
+            keyword: 关键词
             
         Returns:
             是否匹配
         """
-        # 简单实现：检查关键词是否是文本中某个单词的子�?
+        # 简单实现：检查关键词是否是文本中某个单词的子串
         words = text.split()
         for word in words:
             if keyword in word or word in keyword:
@@ -290,13 +290,12 @@ class AttributeMatcher:
     
     def get_attribute_weight(self, attribute: str) -> float:
         """
-        获取属性权�?
+        获取属性权重
         
         Args:
             attribute: 属性名
             
         Returns:
-            权重�?
+            权重值
         """
         return self.ATTRIBUTE_WEIGHTS.get(attribute, 0.5)
-

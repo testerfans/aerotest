@@ -1,4 +1,4 @@
-"""核心模块"""
+"""æ ¸å¿æ¨¡å"""
 
 from aerotest.core.client import AeroTestClient
 

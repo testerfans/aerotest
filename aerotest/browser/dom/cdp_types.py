@@ -1,6 +1,6 @@
 """CDP 类型定义
 
-简化的 CDP 类型定义，移除对 cdp_use 的依�?
+简化的 CDP 类型定义，移除对 cdp_use 的依赖
 """
 
 from enum import Enum
@@ -15,9 +15,9 @@ class ShadowRootType(str, Enum):
 
 
 class AXPropertyName(str, Enum):
-    """AX 属性名称枚�?""
+    """AX 属性名称枚举"""
 
-    # 交互状�?
+    # 交互状态
     CHECKED = "checked"
     SELECTED = "selected"
     EXPANDED = "expanded"
@@ -25,19 +25,19 @@ class AXPropertyName(str, Enum):
     DISABLED = "disabled"
     INVALID = "invalid"
     
-    # 值相�?
+    # 值相关
     VALUEMIN = "valuemin"
     VALUEMAX = "valuemax"
     VALUENOW = "valuenow"
     VALUETEXT = "valuetext"
     
-    # 键盘快捷�?
+    # 键盘快捷键
     KEYSHORTCUTS = "keyshortcuts"
     
     # 弹出菜单
     HASPOPUP = "haspopup"
     
-    # 多�?
+    # 多选
     MULTISELECTABLE = "multiselectable"
     
     # 其他
@@ -46,7 +46,7 @@ class AXPropertyName(str, Enum):
     BUSY = "busy"
     LIVE = "live"
     
-    # 可聚焦和可编�?
+    # 可聚焦和可编辑
     FOCUSABLE = "focusable"
     EDITABLE = "editable"
     SETTABLE = "settable"
@@ -61,4 +61,3 @@ class AXPropertyName(str, Enum):
 # 类型别名
 TargetID = str
 SessionID = str
-

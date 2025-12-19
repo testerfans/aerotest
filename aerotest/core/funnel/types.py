@@ -1,6 +1,6 @@
 """漏斗数据类型定义
 
-定义五层漏斗使用的核心数据结�?
+定义五层漏斗使用的核心数据结构
 """
 
 from dataclasses import dataclass, field
@@ -42,16 +42,16 @@ class ElementType(str, Enum):
 class ActionSlot:
     """动作槽位
     
-    从自然语言中提取的结构化操作信�?
+    从自然语言中提取的结构化操作信息
     
     Attributes:
         action: 动作类型
         target: 目标描述（原始文本）
         target_type: 目标元素类型
-        keywords: 关键词列�?
-        attributes: 属性提示（�?id, name 等）
-        value: 输入值（对于 input 动作�?
-        confidence: 置信度（0.0-1.0�?
+        keywords: 关键词列表
+        attributes: 属性提示（如 id, name 等）
+        value: 输入值（对于 input 动作）
+        confidence: 置信度（0.0-1.0）
     
     Example:
         ```python
@@ -78,7 +78,7 @@ class ActionSlot:
     def __post_init__(self):
         """验证数据"""
         if not 0.0 <= self.confidence <= 1.0:
-            raise ValueError("confidence 必须�?0.0 �?1.0 之间")
+            raise ValueError("confidence 必须在 0.0 到 1.0 之间")
 
 
 @dataclass
@@ -88,11 +88,11 @@ class MatchResult:
     L2 层的元素匹配结果，包含匹配的元素和详细的得分信息
     
     Attributes:
-        element: 匹配�?DOM 元素
-        score: 综合得分�?.0-1.0�?
-        matched_attributes: 匹配的属性及其得�?
-        match_reasons: 匹配原因列表（用于调试和解释�?
-        layer: 匹配所在的层级（L2, L3, L4, L5�?
+        element: 匹配的 DOM 元素
+        score: 综合得分（0.0-1.0）
+        matched_attributes: 匹配的属性及其得分
+        match_reasons: 匹配原因列表（用于调试和解释）
+        layer: 匹配所在的层级（L2, L3, L4, L5）
     
     Example:
         ```python
@@ -104,7 +104,7 @@ class MatchResult:
                 "innerText": 0.8,
             },
             match_reasons=[
-                "ID 'submit-btn' 包含关键�?'submit'",
+                "ID 'submit-btn' 包含关键词 'submit'",
                 "文本 '提交' 精确匹配",
             ],
             layer="L2",
@@ -122,26 +122,26 @@ class MatchResult:
     def __post_init__(self):
         """验证数据"""
         if not 0.0 <= self.score <= 1.0:
-            raise ValueError("score 必须�?0.0 �?1.0 之间")
+            raise ValueError("score 必须在 0.0 到 1.0 之间")
     
     def __lt__(self, other: "MatchResult") -> bool:
-        """支持排序（按分数降序�?""
+        """支持排序（按分数降序）"""
         return self.score > other.score
 
 
 @dataclass
 class FunnelContext:
-    """漏斗上下�?
+    """漏斗上下文
     
-    在漏斗各层之间传递的上下文信�?
+    在漏斗各层之间传递的上下文信息
     
     Attributes:
         instruction: 原始自然语言指令
-        action_slot: L1 提取的槽位信�?
-        l2_candidates: L2 的候选结�?
-        l3_candidates: L3 的候选结�?
-        l4_candidates: L4 的候选结�?
-        final_result: 最终选择的元�?
+        action_slot: L1 提取的槽位信息
+        l2_candidates: L2 的候选结果
+        l3_candidates: L3 的候选结果
+        l4_candidates: L4 的候选结果
+        final_result: 最终选择的元素
         metadata: 额外的元数据
     """
     
@@ -152,4 +152,3 @@ class FunnelContext:
     l4_candidates: list[MatchResult] = field(default_factory=list)
     final_result: Optional[MatchResult] = None
     metadata: dict[str, Any] = field(default_factory=dict)
-

@@ -1,10 +1,10 @@
-"""browser-use DOM 适配�?""
+"""browser-use DOM 适配器"""
 
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-# 添加 browser-use �?Python 路径
+# 添加 browser-use 到 Python 路径
 BROWSER_USE_PATH = Path(__file__).parent.parent.parent.parent / "browser-use"
 if BROWSER_USE_PATH.exists():
     sys.path.insert(0, str(BROWSER_USE_PATH))
@@ -31,35 +31,35 @@ class DomElement:
 
 
 class DomAdapter:
-    """browser-use DOM 服务适配�?""
+    """browser-use DOM 服务适配器"""
 
     def __init__(self, browser_adapter: Any):
         """
-        初始�?DOM 适配�?
+        初始化 DOM 适配器
 
         Args:
-            browser_adapter: 浏览器适配器实�?
+            browser_adapter: 浏览器适配器实例
         """
         self.browser_adapter = browser_adapter
         logger.info("DOM 适配器初始化完成")
 
     async def get_dom_tree(self) -> Dict[str, Any]:
         """
-        获取当前页面�?DOM �?
+        获取当前页面的 DOM 树
 
         Returns:
-            DOM 树数�?
+            DOM 树数据
         """
         try:
-            # TODO: 调用 browser-use �?DomService
+            # TODO: 调用 browser-use 的 DomService
             # from browser_use.dom.service import DomService
             # dom_service = DomService()
             # dom_tree = await dom_service.get_clickable_elements(...)
 
-            logger.info("获取 DOM 树成�?)
+            logger.info("获取 DOM 树成功")
             return {}
         except Exception as e:
-            logger.error(f"获取 DOM 树失�? {e}")
+            logger.error(f"获取 DOM 树失败: {e}")
             raise
 
     async def find_clickable_elements(self) -> List[DomElement]:
@@ -67,14 +67,14 @@ class DomAdapter:
         查找所有可点击元素
 
         Returns:
-            可点击元素列�?
+            可点击元素列表
         """
         try:
-            # TODO: 使用 browser-use �?ClickableElementDetector
-            logger.info("查找可点击元�?)
+            # TODO: 使用 browser-use 的 ClickableElementDetector
+            logger.info("查找可点击元素")
             return []
         except Exception as e:
-            logger.error(f"查找可点击元素失�? {e}")
+            logger.error(f"查找可点击元素失败: {e}")
             raise
 
     async def get_element_by_xpath(self, xpath: str) -> Optional[DomElement]:
@@ -82,10 +82,10 @@ class DomAdapter:
         通过 XPath 获取元素
 
         Args:
-            xpath: 元素�?XPath
+            xpath: 元素的 XPath
 
         Returns:
-            DOM 元素�?None
+            DOM 元素或 None
         """
         try:
             # TODO: 实现 XPath 查询
@@ -97,7 +97,7 @@ class DomAdapter:
 
     async def get_event_listeners(self, element: DomElement) -> List[str]:
         """
-        获取元素上绑定的事件监听�?
+        获取元素上绑定的事件监听器
 
         Args:
             element: DOM 元素
@@ -106,10 +106,9 @@ class DomAdapter:
             事件类型列表
         """
         try:
-            # TODO: 使用 CDP �?DOMDebugger.getEventListeners
-            logger.info(f"获取元素事件监听�? {element}")
+            # TODO: 使用 CDP 的 DOMDebugger.getEventListeners
+            logger.info(f"获取元素事件监听器: {element}")
             return []
         except Exception as e:
-            logger.error(f"获取事件监听器失�? {e}")
+            logger.error(f"获取事件监听器失败: {e}")
             raise
-

@@ -1,6 +1,6 @@
 """L3 引擎
 
-L3 空间布局推理引擎，整合所�?L3 组件
+L3 空间布局推理引擎，整合所有 L3 组件
 """
 
 from typing import Optional
@@ -19,26 +19,26 @@ logger = get_logger("aerotest.funnel.l3")
 class L3Engine(BaseFunnelLayer):
     """L3 空间布局推理引擎
     
-    使用空间位置关系和锚点定位解决非标准控件问题�?
-    1. 检测空间关�?
+    使用空间位置关系和锚点定位解决非标准控件问题：
+    1. 检测空间关系
     2. 提取锚点信息
     3. 定位锚点元素
     4. 邻近搜索
-    5. 转换�?MatchResult
-    6. 返回候�?
+    5. 转换为 MatchResult
+    6. 返回候选
     
     Example:
         ```python
         engine = L3Engine()
         
-        # 处理包含空间关系的指�?
-        context = FunnelContext(instruction="点击用户名输入框右边的按�?)
+        # 处理包含空间关系的指令
+        context = FunnelContext(instruction="点击用户名输入框右边的按钮")
         context = await engine.process(context, dom_state)
         
         candidates = context.l3_candidates
         if candidates:
-            print(f"找到 {len(candidates)} 个候�?)
-            print(f"最佳匹�? {candidates[0].element.tag_name}")
+            print(f"找到 {len(candidates)} 个候选")
+            print(f"最佳匹配: {candidates[0].element.tag_name}")
         ```
     """
     
@@ -49,16 +49,16 @@ class L3Engine(BaseFunnelLayer):
         use_event_listeners: bool = True,
     ):
         """
-        初始�?L3 引擎
+        初始化 L3 引擎
         
         Args:
-            max_distance: 最大搜索距离（像素�?
-            top_n: 返回�?N 个结�?
-            use_event_listeners: 是否使用事件监听器检测（增强非标控件识别�?
+            max_distance: 最大搜索距离（像素）
+            top_n: 返回前 N 个结果
+            use_event_listeners: 是否使用事件监听器检测（增强非标控件识别）
         """
         super().__init__("L3")
         
-        # 初始化组�?
+        # 初始化组件
         self.anchor_locator = AnchorLocator()
         self.proximity_detector = ProximityDetector(max_distance=max_distance)
         self.event_detector = EventListenerDetector() if use_event_listeners else None
@@ -68,7 +68,7 @@ class L3Engine(BaseFunnelLayer):
         self.use_event_listeners = use_event_listeners
         
         self.logger.info(
-            f"L3 引擎初始化完�?"
+            f"L3 引擎初始化完成 "
             f"(max_distance={max_distance}px, top_n={top_n}, "
             f"event_listeners={use_event_listeners})"
         )
@@ -82,16 +82,16 @@ class L3Engine(BaseFunnelLayer):
         空间布局推理处理
         
         Args:
-            context: 漏斗上下�?
-            dom_state: DOM 状�?
+            context: 漏斗上下文
+            dom_state: DOM 状态
             
         Returns:
-            更新后的上下文（包含 l3_candidates�?
+            更新后的上下文（包含 l3_candidates）
         """
         self.log_start()
         
         if not context.action_slot:
-            self.logger.warning("没有槽位信息，跳�?L3")
+            self.logger.warning("没有槽位信息，跳过 L3")
             return context
         
         if not dom_state:
@@ -100,7 +100,7 @@ class L3Engine(BaseFunnelLayer):
         
         instruction = context.instruction
         
-        # 1. 检查是否包含空间关�?
+        # 1. 检查是否包含空间关系
         if not self.anchor_locator.has_spatial_relation(instruction):
             self.logger.info("指令不包含空间关系，跳过 L3")
             return context
@@ -119,7 +119,7 @@ class L3Engine(BaseFunnelLayer):
         
         self.logger.info(f"锚点元素: {anchor_element.tag_name}")
         
-        # 4. 获取所有候选元�?
+        # 4. 获取所有候选元素
         candidates = self._get_all_elements(dom_state)
         
         # 5. 邻近搜索
@@ -138,23 +138,23 @@ class L3Engine(BaseFunnelLayer):
                 
                 # 检查是否有事件监听器（如果节点有该属性）
                 if hasattr(element, 'event_listeners') and element.event_listeners:
-                    # 有事件监听器，提升得�?
+                    # 有事件监听器，提升得分
                     has_interactive = self.event_detector.has_interactive_events(
                         element.event_listeners
                     )
                     if has_interactive:
-                        # 提升 0.1 �?
+                        # 提升 0.1 分
                         result.score = min(1.0, result.score + 0.1)
                         self.logger.debug(
-                            f"元素 {element.backend_node_id} 有事件监听器�?
-                            f"得分提升�?{result.score:.2f}"
+                            f"元素 {element.backend_node_id} 有事件监听器，"
+                            f"得分提升到 {result.score:.2f}"
                         )
                 
                 enhanced_results.append(result)
             
             proximity_results = enhanced_results
         
-        # 6. 转换�?MatchResult
+        # 6. 转换为 MatchResult
         match_results = []
         for i, proximity_result in enumerate(proximity_results[:self.top_n]):
             reasons = [
@@ -163,11 +163,11 @@ class L3Engine(BaseFunnelLayer):
                 f"方向匹配: {proximity_result.direction_match}",
             ]
             
-            # 添加事件监听器信�?
+            # 添加事件监听器信息
             element = proximity_result.element
             if hasattr(element, 'event_listeners') and element.event_listeners:
                 event_types = [l.type for l in element.event_listeners]
-                reasons.append(f"事件监听�? {', '.join(event_types)}")
+                reasons.append(f"事件监听器: {', '.join(event_types)}")
             
             match_result = MatchResult(
                 element=proximity_result.element,
@@ -188,7 +188,7 @@ class L3Engine(BaseFunnelLayer):
             best = match_results[0]
             self.logger.info(
                 f"L3 处理完成: {len(match_results)} 个候选，"
-                f"最佳得�? {best.score:.2f}"
+                f"最佳得分: {best.score:.2f}"
             )
         
         self.log_end(len(match_results))
@@ -199,14 +199,13 @@ class L3Engine(BaseFunnelLayer):
         dom_state: SerializedDOMState,
     ) -> list:
         """
-        获取所有元�?
+        获取所有元素
         
         Args:
-            dom_state: DOM 状�?
+            dom_state: DOM 状态
             
         Returns:
-            所有元素列�?
+            所有元素列表
         """
-        # 返回所有简化节�?
+        # 返回所有简化节点
         return list(dom_state.simplified_nodes)
-

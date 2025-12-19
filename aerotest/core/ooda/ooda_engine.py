@@ -1,6 +1,6 @@
 """OODA 引擎
 
-实现完整�?OODA (Observe-Orient-Decide-Act) 循环
+实现完整的OODA (Observe-Orient-Decide-Act) 循环
 """
 
 import asyncio
@@ -34,13 +34,13 @@ from aerotest.utils.logger import get_logger
 class OODAEngine:
     """OODA 引擎
     
-    实现完整�?OODA 循环，用于智�?UI 自动化测�?
+    实现完整的OODA 循环，用于智的UI 自动化测的
     
-    工作流程�?
-    1. Observe: 观察当前页面状�?
-    2. Orient: 分析并定位目标元素（五层漏斗�?
+    工作流程的
+    1. Observe: 观察当前页面状的
+    2. Orient: 分析并定位目标元素（五层漏斗的
     3. Decide: 决策执行策略
-    4. Act: 执行操作并验证结�?
+    4. Act: 执行操作并验证结的
     
     Example:
         ```python
@@ -65,22 +65,22 @@ class OODAEngine:
         logger=None,
     ):
         """
-        初始�?OODA 引擎
+        初始的OODA 引擎
         
         Args:
             cdp_session: CDP Session（可选）
             use_l3: 是否启用 L3 空间布局推理
             use_l4: 是否启用 L4 AI 推理
             use_l5: 是否启用 L5 视觉识别
-            logger: 日志记录�?
+            logger: 日志记录的
         """
         self.logger = logger or get_logger(__name__)
         self.cdp_session = cdp_session
 
-        # 初始�?DOM 服务
+        # 初始的DOM 服务
         self.dom_service = DomService(cdp_session)
 
-        # 初始化五层漏�?
+        # 初始化五层漏的
         self.l1_engine = L1Engine()
         self.l2_engine = L2Engine()
         self.l3_engine = L3Engine() if use_l3 else None
@@ -92,7 +92,7 @@ class OODAEngine:
         self.use_l5 = use_l5
 
         self.logger.info(
-            f"OODA 引擎初始化完�?"
+            f"OODA 引擎初始化完的"
             f"(L3={use_l3}, L4={use_l4}, L5={use_l5})"
         )
 
@@ -102,22 +102,22 @@ class OODAEngine:
         context: ExecutionContext,
     ) -> ExecutionResult:
         """
-        执行单个测试步骤（完整的 OODA 循环�?
+        执行单个测试步骤（完整的 OODA 循环的
         
         Args:
             step: 测试步骤
-            context: 执行上下�?
+            context: 执行上下的
             
         Returns:
             执行结果
         """
-        self.logger.info(f"开始执行步�? {step.step_id} - {step.description}")
+        self.logger.info(f"开始执行步的 {step.step_id} - {step.description}")
         start_time = datetime.now()
         step.start_time = start_time
         step.status = ActionStatus.RUNNING
 
         try:
-            # 1. Observe: 观察页面状�?
+            # 1. Observe: 观察页面状的
             observation = await self._observe(context)
             step.observation = observation
             self.logger.debug(f"Observe 完成")
@@ -127,7 +127,7 @@ class OODAEngine:
             step.orientation = orientation
             self.logger.debug(
                 f"Orient 完成 - 策略: {orientation.strategy}, "
-                f"置信�? {orientation.confidence:.2f}"
+                f"置信的 {orientation.confidence:.2f}"
             )
 
             # 3. Decide: 决策执行策略
@@ -138,13 +138,13 @@ class OODAEngine:
             # 4. Act: 执行操作
             action = await self._act(decision, context)
             step.action = action
-            self.logger.debug(f"Act 完成 - 状�? {action.status}")
+            self.logger.debug(f"Act 完成 - 状的 {action.status}")
 
             # 5. 验证结果
             if step.expected_value is not None:
                 await self._verify(step, action, context)
 
-            # 6. 更新步骤状�?
+            # 6. 更新步骤状的
             step.status = action.status
             step.end_time = datetime.now()
             step.duration_ms = (
@@ -166,7 +166,7 @@ class OODAEngine:
 
             self.logger.info(
                 f"步骤执行完成: {step.step_id} - "
-                f"状�? {step.status}, 耗时: {step.duration_ms:.2f}ms"
+                f"状的 {step.status}, 耗时: {step.duration_ms:.2f}ms"
             )
 
             return result
@@ -189,22 +189,22 @@ class OODAEngine:
 
     async def _observe(self, context: ExecutionContext) -> Observation:
         """
-        Observe: 观察当前页面状�?
+        Observe: 观察当前页面状的
         
         Args:
-            context: 执行上下�?
+            context: 执行上下的
             
         Returns:
             观察结果
         """
-        self.logger.debug("开�?Observe 阶段")
+        self.logger.debug("开的Observe 阶段")
 
         observation = Observation()
 
-        # 获取 DOM �?
+        # 获取 DOM 的
         if context.target_id:
             try:
-                # 使用增强�?DOM 树（包含事件监听器）
+                # 使用增强的DOM 树（包含事件监听器）
                 if hasattr(self.dom_service, "get_dom_tree_with_events"):
                     dom_tree = await self.dom_service.get_dom_tree_with_events(
                         context.target_id
@@ -218,12 +218,12 @@ class OODAEngine:
                 self._collect_elements(dom_tree, observation)
 
             except Exception as e:
-                self.logger.warning(f"获取 DOM 树失�? {str(e)}")
+                self.logger.warning(f"获取 DOM 树失的 {str(e)}")
 
-        # 获取页面信息（如果有 CDP Session�?
+        # 获取页面信息（如果有 CDP Session的
         if self.cdp_session and context.target_id:
             try:
-                # TODO: �?CDP Session 获取 URL, title �?
+                # TODO: 的CDP Session 获取 URL, title 的
                 # observation.url = await self.cdp_session.get_url(context.target_id)
                 # observation.title = await self.cdp_session.get_title(context.target_id)
                 pass
@@ -233,7 +233,7 @@ class OODAEngine:
         self.logger.debug(
             f"Observe 完成 - "
             f"可见元素: {len(observation.visible_elements)}, "
-            f"可交互元�? {len(observation.interactive_elements)}"
+            f"可交互元的 {len(observation.interactive_elements)}"
         )
 
         return observation
@@ -266,17 +266,17 @@ class OODAEngine:
         context: ExecutionContext,
     ) -> Orientation:
         """
-        Orient: 分析并定位目标元素（五层漏斗�?
+        Orient: 分析并定位目标元素（五层漏斗的
         
         Args:
             step: 测试步骤
             observation: 观察结果
-            context: 执行上下�?
+            context: 执行上下的
             
         Returns:
             定向结果
         """
-        self.logger.debug("开�?Orient 阶段")
+        self.logger.debug("开的Orient 阶段")
 
         orientation = Orientation(current_step=step)
 
@@ -297,7 +297,7 @@ class OODAEngine:
             self.logger.error(f"L1 失败: {str(e)}")
             return orientation
 
-        # L2: 启发式属性匹�?
+        # L2: 启发式属性匹的
         try:
             if observation.dom_tree:
                 l2_matches = await self.l2_engine.match_elements(
@@ -311,8 +311,8 @@ class OODAEngine:
                     orientation.confidence = l2_matches[0].score
 
                     self.logger.debug(
-                        f"L2 匹配成功: {len(l2_matches)} 个候�? "
-                        f"最佳得�? {l2_matches[0].score:.2f}"
+                        f"L2 匹配成功: {len(l2_matches)} 个候的 "
+                        f"最佳得的 {l2_matches[0].score:.2f}"
                     )
 
                     # 如果 L2 得分足够高，直接返回
@@ -336,8 +336,8 @@ class OODAEngine:
                     orientation.confidence = l3_matches[0].score
 
                     self.logger.debug(
-                        f"L3 匹配成功: {len(l3_matches)} 个候�? "
-                        f"最佳得�? {l3_matches[0].score:.2f}"
+                        f"L3 匹配成功: {len(l3_matches)} 个候的 "
+                        f"最佳得的 {l3_matches[0].score:.2f}"
                     )
 
                     # 如果 L3 得分足够高，直接返回
@@ -387,7 +387,7 @@ class OODAEngine:
 
         self.logger.debug(
             f"Orient 完成 - 策略: {orientation.strategy}, "
-            f"置信�? {orientation.confidence:.2f}"
+            f"置信的 {orientation.confidence:.2f}"
         )
 
         return orientation
@@ -404,19 +404,19 @@ class OODAEngine:
         Args:
             step: 测试步骤
             orientation: 定向结果
-            context: 执行上下�?
+            context: 执行上下的
             
         Returns:
             决策结果
         """
-        self.logger.debug("开�?Decide 阶段")
+        self.logger.debug("开的Decide 阶段")
 
         decision = Decision(action_type=step.action_type)
 
-        # 检查是否找到目标元�?
+        # 检查是否找到目标元的
         if not orientation.best_match:
             decision.should_execute = False
-            decision.reason = "未找到目标元�?
+            decision.reason = "未找到目标元的
             self.logger.warning("Decide: 未找到目标元素，跳过执行")
             return decision
 
@@ -434,7 +434,7 @@ class OODAEngine:
         # 决策原因
         decision.reason = (
             f"使用 {orientation.strategy} 策略, "
-            f"置信�? {orientation.confidence:.2f}"
+            f"置信的 {orientation.confidence:.2f}"
         )
 
         self.logger.debug(f"Decide 完成 - 操作: {decision.action_type}")
@@ -449,12 +449,12 @@ class OODAEngine:
         
         Args:
             decision: 决策结果
-            context: 执行上下�?
+            context: 执行上下的
             
         Returns:
             行动结果
         """
-        self.logger.debug("开�?Act 阶段")
+        self.logger.debug("开的Act 阶段")
 
         action = Action(
             action_type=decision.action_type,
@@ -466,7 +466,7 @@ class OODAEngine:
         action.status = ActionStatus.RUNNING
 
         try:
-            # 检查是否应该执�?
+            # 检查是否应该执的
             if not decision.should_execute:
                 action.status = ActionStatus.SKIPPED
                 action.result = None
@@ -512,7 +512,7 @@ class OODAEngine:
                 (action.end_time - action.start_time).total_seconds() * 1000
             )
 
-        self.logger.debug(f"Act 完成 - 状�? {action.status}")
+        self.logger.debug(f"Act 完成 - 状的 {action.status}")
 
         return action
 
@@ -524,7 +524,7 @@ class OODAEngine:
         
         Args:
             decision: 决策结果
-            context: 执行上下�?
+            context: 执行上下的
             
         Returns:
             执行结果
@@ -535,7 +535,7 @@ class OODAEngine:
             f"({decision.target_element.tag_name})"
         )
 
-        # TODO: 实际�?CDP 点击操作
+        # TODO: 实际的CDP 点击操作
         # if self.cdp_session:
         #     await self.cdp_session.click(
         #         decision.target_element.backend_node_id,
@@ -555,7 +555,7 @@ class OODAEngine:
         
         Args:
             decision: 决策结果
-            context: 执行上下�?
+            context: 执行上下的
             
         Returns:
             执行结果
@@ -565,10 +565,10 @@ class OODAEngine:
         self.logger.info(
             f"执行输入: "
             f"元素 {decision.target_element.backend_node_id}, "
-            f"�? '{value}'"
+            f"的 '{value}'"
         )
 
-        # TODO: 实际�?CDP 输入操作
+        # TODO: 实际的CDP 输入操作
         # if self.cdp_session:
         #     await self.cdp_session.input(
         #         decision.target_element.backend_node_id,
@@ -589,14 +589,14 @@ class OODAEngine:
         
         Args:
             decision: 决策结果
-            context: 执行上下�?
+            context: 执行上下的
             
         Returns:
             执行结果
         """
         duration = decision.parameters.get("duration", 1.0)
 
-        self.logger.info(f"执行等待: {duration} �?)
+        self.logger.info(f"执行等待: {duration} 的)
 
         await asyncio.sleep(duration)
 
@@ -610,7 +610,7 @@ class OODAEngine:
         
         Args:
             decision: 决策结果
-            context: 执行上下�?
+            context: 执行上下的
             
         Returns:
             执行结果
@@ -634,7 +634,7 @@ class OODAEngine:
         Args:
             step: 测试步骤
             action: 行动结果
-            context: 执行上下�?
+            context: 执行上下的
         """
         if step.expected_value is None:
             return
@@ -643,6 +643,6 @@ class OODAEngine:
 
         # TODO: 实现回执验证
         # 1. 等待页面响应
-        # 2. 检查元素状态变�?
-        # 3. 验证期望�?
+        # 2. 检查元素状态变的
+        # 3. 验证期望的
 

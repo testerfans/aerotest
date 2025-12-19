@@ -1,6 +1,6 @@
-"""用例执行器
+"""ç¨ä¾æ§è¡å¨
 
-用于执行完整的测试用例
+ç¨äºæ§è¡å®æ´çæµè¯ç¨ä¾
 """
 
 from datetime import datetime
@@ -19,26 +19,26 @@ from aerotest.utils.logger import get_logger
 
 
 class CaseExecutor:
-    """用例执行器
+    """ç¨ä¾æ§è¡å¨
     
-    用于执行完整的测试用例，管理步骤执行顺序和异常处理
+    ç¨äºæ§è¡å®æ´çæµè¯ç¨ä¾ï¼ç®¡çæ­¥éª¤æ§è¡é¡ºåºåå¼å¸¸å¤ç
     
     Example:
         ```python
         executor = CaseExecutor(cdp_session)
         
-        # 创建用例
+        # åå»ºç¨ä¾
         case = TestCase(
             case_id="TC001",
-            name="登录测试",
+            name="ç»å½æµè¯",
             steps=[
-                TestStep(step_id="1", description="输入用户名", ...),
-                TestStep(step_id="2", description="输入密码", ...),
-                TestStep(step_id="3", description="点击登录", ...),
+                TestStep(step_id="1", description="è¾å¥ç¨æ·å", ...),
+                TestStep(step_id="2", description="è¾å¥å¯ç ", ...),
+                TestStep(step_id="3", description="ç¹å»ç»å½", ...),
             ]
         )
         
-        # 执行用例
+        # æ§è¡ç¨ä¾
         result = await executor.execute_case(case, context)
         ```
     """
@@ -53,21 +53,21 @@ class CaseExecutor:
         logger=None,
     ):
         """
-        初始化用例执行器
+        åå§åç¨ä¾æ§è¡å¨
         
         Args:
-            cdp_session: CDP Session（可选）
-            use_l3: 是否启用 L3 空间布局推理
-            use_l4: 是否启用 L4 AI 推理
-            use_l5: 是否启用 L5 视觉识别
-            max_retries: 最大重试次数
-            logger: 日志记录器
+            cdp_session: CDP Sessionï¼å¯éï¼
+            use_l3: æ¯å¦å¯ç¨ L3 ç©ºé´å¸å±æ¨ç
+            use_l4: æ¯å¦å¯ç¨ L4 AI æ¨ç
+            use_l5: æ¯å¦å¯ç¨ L5 è§è§è¯å«
+            max_retries: æå¤§éè¯æ¬¡æ°
+            logger: æ¥å¿è®°å½å¨
         """
         self.logger = logger or get_logger(__name__)
         self.cdp_session = cdp_session
         self.max_retries = max_retries
 
-        # 初始化 OODA 引擎
+        # åå§å OODA å¼æ
         self.ooda_engine = OODAEngine(
             cdp_session=cdp_session,
             use_l3=use_l3,
@@ -76,7 +76,7 @@ class CaseExecutor:
         )
 
         self.logger.info(
-            f"用例执行器初始化完成 "
+            f"ç¨ä¾æ§è¡å¨åå§åå®æ "
             f"(L3={use_l3}, L4={use_l4}, L5={use_l5}, "
             f"max_retries={max_retries})"
         )
@@ -87,29 +87,29 @@ class CaseExecutor:
         context: Optional[ExecutionContext] = None,
     ) -> ExecutionResult:
         """
-        执行测试用例
+        æ§è¡æµè¯ç¨ä¾
         
         Args:
-            case: 测试用例
-            context: 执行上下文（可选）
+            case: æµè¯ç¨ä¾
+            context: æ§è¡ä¸ä¸æï¼å¯éï¼
             
         Returns:
-            执行结果
+            æ§è¡ç»æ
         """
-        self.logger.info(f"开始执行用例: {case.case_id} - {case.name}")
+        self.logger.info(f"å¼å§æ§è¡ç¨ä¾: {case.case_id} - {case.name}")
         start_time = datetime.now()
         case.start_time = start_time
         case.status = ActionStatus.RUNNING
 
-        # 初始化上下文
+        # åå§åä¸ä¸æ
         if context is None:
             context = ExecutionContext()
 
-        # 合并用例环境和上下文
+        # åå¹¶ç¨ä¾ç¯å¢åä¸ä¸æ
         if case.environment:
             context.config.update(case.environment)
 
-        # 初始化统计信息
+        # åå§åç»è®¡ä¿¡æ¯
         stats = {
             "total": len(case.steps),
             "success": 0,
@@ -117,41 +117,41 @@ class CaseExecutor:
             "skipped": 0,
         }
 
-        # 步骤结果列表
+        # æ­¥éª¤ç»æåè¡¨
         step_results = []
 
         try:
-            # 逐个执行步骤
+            # éä¸ªæ§è¡æ­¥éª¤
             for i, step in enumerate(case.steps):
                 self.logger.info(
-                    f"执行步骤 {i + 1}/{len(case.steps)}: "
+                    f"æ§è¡æ­¥éª¤ {i + 1}/{len(case.steps)}: "
                     f"{step.step_id} - {step.description}"
                 )
 
-                # 执行步骤（带重试）
+                # æ§è¡æ­¥éª¤ï¼å¸¦éè¯ï¼
                 result = await self._execute_step_with_retry(step, context)
 
-                # 记录结果
+                # è®°å½ç»æ
                 step_results.append(result)
 
-                # 更新统计
+                # æ´æ°ç»è®¡
                 if result.status == ActionStatus.SUCCESS:
                     stats["success"] += 1
                 elif result.status == ActionStatus.FAILED:
                     stats["failed"] += 1
-                    # 失败时，根据配置决定是否继续
+                    # å¤±è´¥æ¶ï¼æ ¹æ®éç½®å³å®æ¯å¦ç»§ç»­
                     if context.config.get("stop_on_failure", True):
                         self.logger.warning(
-                            f"步骤失败，停止执行: {step.step_id}"
+                            f"æ­¥éª¤å¤±è´¥ï¼åæ­¢æ§è¡: {step.step_id}"
                         )
                         break
                 elif result.status == ActionStatus.SKIPPED:
                     stats["skipped"] += 1
 
-                # 添加到历史记录
+                # æ·»å å°åå²è®°å½
                 context.history.append(step)
 
-            # 更新用例状态
+            # æ´æ°ç¨ä¾ç¶æ
             if stats["failed"] > 0:
                 case.status = ActionStatus.FAILED
             elif stats["skipped"] == stats["total"]:
@@ -160,7 +160,7 @@ class CaseExecutor:
                 case.status = ActionStatus.SUCCESS
 
         except Exception as e:
-            self.logger.error(f"用例执行异常: {str(e)}", exc_info=True)
+            self.logger.error(f"ç¨ä¾æ§è¡å¼å¸¸: {str(e)}", exc_info=True)
             case.status = ActionStatus.FAILED
 
         finally:
@@ -169,7 +169,7 @@ class CaseExecutor:
                 (case.end_time - case.start_time).total_seconds() * 1000
             )
 
-        # 构建结果
+        # æå»ºç»æ
         result = ExecutionResult(
             success=(case.status == ActionStatus.SUCCESS),
             status=case.status,
@@ -180,10 +180,10 @@ class CaseExecutor:
         )
 
         self.logger.info(
-            f"用例执行完成: {case.case_id} - "
-            f"状态: {case.status}, "
-            f"成功: {stats['success']}/{stats['total']}, "
-            f"耗时: {case.duration_ms:.2f}ms"
+            f"ç¨ä¾æ§è¡å®æ: {case.case_id} - "
+            f"ç¶æ: {case.status}, "
+            f"æå: {stats['success']}/{stats['total']}, "
+            f"èæ¶: {case.duration_ms:.2f}ms"
         )
 
         return result
@@ -194,67 +194,67 @@ class CaseExecutor:
         context: ExecutionContext,
     ) -> ExecutionResult:
         """
-        执行步骤（带重试）
+        æ§è¡æ­¥éª¤ï¼å¸¦éè¯ï¼
         
         Args:
-            step: 测试步骤
-            context: 执行上下文
+            step: æµè¯æ­¥éª¤
+            context: æ§è¡ä¸ä¸æ
             
         Returns:
-            执行结果
+            æ§è¡ç»æ
         """
         retry_count = 0
         last_error = None
 
         while retry_count <= self.max_retries:
             try:
-                # 执行步骤
+                # æ§è¡æ­¥éª¤
                 result = await self.ooda_engine.execute_step(step, context)
 
-                # 如果成功，直接返回
+                # å¦ææåï¼ç´æ¥è¿å
                 if result.success:
                     return result
 
-                # 如果失败但可重试
+                # å¦æå¤±è´¥ä½å¯éè¯
                 last_error = result.error
 
                 if retry_count < self.max_retries:
                     self.logger.warning(
-                        f"步骤执行失败，进行第 {retry_count + 1} 次重试: "
+                        f"æ­¥éª¤æ§è¡å¤±è´¥ï¼è¿è¡ç¬¬ {retry_count + 1} æ¬¡éè¯: "
                         f"{step.step_id}"
                     )
                     retry_count += 1
                     step.action.retry_count = retry_count
                     step.action.status = ActionStatus.RETRY
                 else:
-                    # 达到最大重试次数
+                    # è¾¾å°æå¤§éè¯æ¬¡æ°
                     self.logger.error(
-                        f"步骤执行失败，已达最大重试次数: {step.step_id}"
+                        f"æ­¥éª¤æ§è¡å¤±è´¥ï¼å·²è¾¾æå¤§éè¯æ¬¡æ°: {step.step_id}"
                     )
                     return result
 
             except Exception as e:
                 last_error = str(e)
                 self.logger.error(
-                    f"步骤执行异常 (retry={retry_count}): {str(e)}",
+                    f"æ­¥éª¤æ§è¡å¼å¸¸ (retry={retry_count}): {str(e)}",
                     exc_info=True,
                 )
 
                 if retry_count < self.max_retries:
                     retry_count += 1
                 else:
-                    # 达到最大重试次数，返回失败结果
+                    # è¾¾å°æå¤§éè¯æ¬¡æ°ï¼è¿åå¤±è´¥ç»æ
                     return ExecutionResult(
                         success=False,
                         status=ActionStatus.FAILED,
                         error=last_error,
                     )
 
-        # 不应该到达这里，但作为保险
+        # ä¸åºè¯¥å°è¾¾è¿éï¼ä½ä½ä¸ºä¿é©
         return ExecutionResult(
             success=False,
             status=ActionStatus.FAILED,
-            error=last_error or "未知错误",
+            error=last_error or "æªç¥éè¯¯",
         )
 
     async def batch_execute(
@@ -263,30 +263,30 @@ class CaseExecutor:
         context: Optional[ExecutionContext] = None,
     ) -> list[ExecutionResult]:
         """
-        批量执行测试用例
+        æ¹éæ§è¡æµè¯ç¨ä¾
         
         Args:
-            cases: 测试用例列表
-            context: 执行上下文（可选）
+            cases: æµè¯ç¨ä¾åè¡¨
+            context: æ§è¡ä¸ä¸æï¼å¯éï¼
             
         Returns:
-            执行结果列表
+            æ§è¡ç»æåè¡¨
         """
-        self.logger.info(f"开始批量执行 {len(cases)} 个用例")
+        self.logger.info(f"å¼å§æ¹éæ§è¡ {len(cases)} ä¸ªç¨ä¾")
 
         results = []
         for i, case in enumerate(cases):
-            self.logger.info(f"执行用例 {i + 1}/{len(cases)}: {case.name}")
+            self.logger.info(f"æ§è¡ç¨ä¾ {i + 1}/{len(cases)}: {case.name}")
             result = await self.execute_case(case, context)
             results.append(result)
 
-        # 统计
+        # ç»è®¡
         total = len(results)
         success = sum(1 for r in results if r.success)
         failed = total - success
 
         self.logger.info(
-            f"批量执行完成: 成功 {success}/{total}, 失败 {failed}"
+            f"æ¹éæ§è¡å®æ: æå {success}/{total}, å¤±è´¥ {failed}"
         )
 
         return results

@@ -1,4 +1,4 @@
-"""FastAPI 应用主入�?""
+"""FastAPI 应用主入口"""
 
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
@@ -15,17 +15,17 @@ logger = get_logger("aerotest.api")
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """应用生命周期管理"""
-    logger.info("AeroTest API 启动�?..")
+    logger.info("AeroTest API 启动中...")
 
     # 启动时的初始化逻辑
-    # TODO: 初始化数据库连接�?
-    # TODO: 初始�?Redis 连接
+    # TODO: 初始化数据库连接池
+    # TODO: 初始化 Redis 连接
 
     yield
 
     # 关闭时的清理逻辑
-    logger.info("AeroTest API 关闭�?..")
-    # TODO: 关闭数据库连�?
+    logger.info("AeroTest API 关闭中...")
+    # TODO: 关闭数据库连接
     # TODO: 关闭 Redis 连接
 
 
@@ -35,7 +35,7 @@ def create_app() -> FastAPI:
 
     app = FastAPI(
         title="AeroTest AI",
-        description="基于 AI 驱动的通用 UI 自动化测试平�?,
+        description="基于 AI 驱动的通用 UI 自动化测试平台",
         version="0.1.0",
         docs_url="/api/docs",
         redoc_url="/api/redoc",
@@ -80,4 +80,3 @@ if __name__ == "__main__":
         port=settings.api_port,
         reload=settings.api_reload,
     )
-

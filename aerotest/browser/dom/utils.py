@@ -16,7 +16,7 @@ def cap_text_length(text: str, max_length: int) -> str:
     
     Args:
         text: 原始文本
-        max_length: 最大长�?
+        max_length: 最大长度
     
     Returns:
         截断后的文本
@@ -28,25 +28,25 @@ def cap_text_length(text: str, max_length: int) -> str:
 
 def generate_css_selector_for_element(enhanced_node: "EnhancedDOMTreeNode") -> str | None:
     """
-    为元素生�?CSS 选择�?
+    为元素生成 CSS 选择器
     
     Args:
-        enhanced_node: 增强�?DOM 树节�?
+        enhanced_node: 增强的 DOM 树节点
     
     Returns:
-        CSS 选择器字符串�?None
+        CSS 选择器字符串或 None
     """
     if not enhanced_node or not hasattr(enhanced_node, "tag_name") or not enhanced_node.tag_name:
         return None
 
-    # 获取基础选择�?
+    # 获取基础选择器
     tag_name = enhanced_node.tag_name.lower().strip()
     if not tag_name or not re.match(r"^[a-zA-Z][a-zA-Z0-9-]*$", tag_name):
         return None
 
     css_selector = tag_name
 
-    # 添加 ID（最具体�?
+    # 添加 ID（最具体）
     if enhanced_node.attributes and "id" in enhanced_node.attributes:
         element_id = enhanced_node.attributes["id"]
         if element_id and element_id.strip():
@@ -55,11 +55,11 @@ def generate_css_selector_for_element(enhanced_node: "EnhancedDOMTreeNode") -> s
             if re.match(r"^[a-zA-Z][a-zA-Z0-9_-]*$", element_id):
                 return f"#{element_id}"
             else:
-                # 对于带特殊字符的 ID，使用属性选择�?
+                # 对于带特殊字符的 ID，使用属性选择器
                 escaped_id = element_id.replace('"', '\\"')
                 return f'{tag_name}[id="{escaped_id}"]'
 
-    # 处理 class 属�?
+    # 处理 class 属性
     if enhanced_node.attributes and "class" in enhanced_node.attributes and enhanced_node.attributes["class"]:
         valid_class_name_pattern = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_-]*$")
         classes = enhanced_node.attributes["class"].split()
@@ -70,7 +70,7 @@ def generate_css_selector_for_element(enhanced_node: "EnhancedDOMTreeNode") -> s
             if valid_class_name_pattern.match(class_name):
                 css_selector += f".{class_name}"
 
-    # 安全属性列�?
+    # 安全属性列表
     SAFE_ATTRIBUTES = {
         "id", "name", "type", "placeholder",
         "aria-label", "aria-labelledby", "aria-describedby", "role",
@@ -79,7 +79,7 @@ def generate_css_selector_for_element(enhanced_node: "EnhancedDOMTreeNode") -> s
         "data-id", "data-qa", "data-cy", "data-testid",
     }
 
-    # 处理其他属�?
+    # 处理其他属性
     if enhanced_node.attributes:
         for attribute, value in enhanced_node.attributes.items():
             if attribute == "class":
@@ -100,9 +100,8 @@ def generate_css_selector_for_element(enhanced_node: "EnhancedDOMTreeNode") -> s
             else:
                 css_selector += f'[{safe_attribute}="{value}"]'
 
-    # 最终验�?
+    # 最终验证
     if css_selector and not any(char in css_selector for char in ["\n", "\r", "\t"]):
         return css_selector
 
     return tag_name
-

@@ -1,16 +1,16 @@
 """CDP (Chrome DevTools Protocol) 集成模块
 
-提供轻量级的 CDP 连接和会话管理，�?AeroTest 能够�?
-- 连接到本�?Chrome/Edge 浏览�?
-- 获取页面 DOM �?
+提供轻量级的 CDP 连接和会话管理，使 AeroTest 能够：
+- 连接到本地 Chrome/Edge 浏览器
+- 获取页面 DOM 树
 - 执行基本页面操作
 
-这是 Week 3 的核心模块，采用智能复用策略�?
-- 复用 browser-use 的核心算�?
+这是 Week 3 的核心模块，采用智能复用策略：
+- 复用 browser-use 的核心算法
 - 简化架构，移除不需要的功能（EventBus, Cloud, Watchdogs等）
 
 来源: 部分复用 browser-use v0.11.2
-许可�? MIT
+许可证: MIT
 """
 
 from aerotest.browser.cdp.connection import CDPConnection, CDPConnectionConfig
@@ -27,4 +27,3 @@ __all__ = [
     "PageInfo",
     "TargetInfo",
 ]
-

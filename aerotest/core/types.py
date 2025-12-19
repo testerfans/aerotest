@@ -22,7 +22,7 @@ class ActionType(str, Enum):
 
 
 class TestStatus(str, Enum):
-    """测试状态枚�?""
+    """测试状态枚举"""
 
     PENDING = "pending"
     RUNNING = "running"
@@ -36,7 +36,7 @@ class ElementLocatorStrategy(str, Enum):
     """元素定位策略"""
 
     L1_RULE = "l1_rule"  # L1 规则槽位
-    L2_ATTRIBUTE = "l2_attribute"  # L2 属性匹�?
+    L2_ATTRIBUTE = "l2_attribute"  # L2 属性匹配
     L3_SPATIAL = "l3_spatial"  # L3 空间推理
     L4_AI_REASONING = "l4_ai_reasoning"  # L4 AI 推理
     L5_VISION = "l5_vision"  # L5 视觉识别
@@ -47,13 +47,13 @@ class TestStep(BaseModel):
     """测试步骤"""
 
     action: ActionType = Field(description="操作类型")
-    selector: Optional[str] = Field(default=None, description="元素选择器（支持自然语言�?)
-    value: Optional[Any] = Field(default=None, description="操作�?)
-    expected: Optional[Any] = Field(default=None, description="期望结果（用于断言�?)
+    selector: Optional[str] = Field(default=None, description="元素选择器（支持自然语言）")
+    value: Optional[Any] = Field(default=None, description="操作值")
+    expected: Optional[Any] = Field(default=None, description="期望结果（用于断言）")
     timeout: Optional[int] = Field(default=None, description="超时时间（毫秒）")
     retry: Optional[int] = Field(default=3, description="重试次数")
     description: Optional[str] = Field(default=None, description="步骤描述")
-    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="额外元数�?)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="额外元数据")
 
 
 class TestCase(BaseModel):
@@ -63,37 +63,37 @@ class TestCase(BaseModel):
     description: Optional[str] = Field(default=None, description="测试用例描述")
     steps: List[TestStep] = Field(description="测试步骤列表")
     tags: Optional[List[str]] = Field(default_factory=list, description="标签")
-    priority: Optional[int] = Field(default=3, description="优先�?(1-5)")
+    priority: Optional[int] = Field(default=3, description="优先级(1-5)")
     timeout: Optional[int] = Field(default=300000, description="整体超时时间（毫秒）")
-    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="额外元数�?)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="额外元数据")
 
 
 class StepResult(BaseModel):
     """步骤执行结果"""
 
-    step: TestStep = Field(description="执行的步�?)
-    status: TestStatus = Field(description="执行状�?)
+    step: TestStep = Field(description="执行的步骤")
+    status: TestStatus = Field(description="执行状态")
     locator_strategy: Optional[ElementLocatorStrategy] = Field(
-        default=None, description="使用的定位策�?
+        default=None, description="使用的定位策略"
     )
-    execution_time: float = Field(description="执行时间（秒�?)
+    execution_time: float = Field(description="执行时间（秒）")
     error_message: Optional[str] = Field(default=None, description="错误信息")
     screenshot_path: Optional[str] = Field(default=None, description="截图路径")
-    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="额外元数�?)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="额外元数据")
 
 
 class TestResult(BaseModel):
     """测试结果"""
 
     test_case: TestCase = Field(description="测试用例")
-    status: TestStatus = Field(description="测试状�?)
-    start_time: datetime = Field(description="开始时�?)
+    status: TestStatus = Field(description="测试状态")
+    start_time: datetime = Field(description="开始时间")
     end_time: Optional[datetime] = Field(default=None, description="结束时间")
     execution_time: float = Field(default=0.0, description="总执行时间（秒）")
     step_results: List[StepResult] = Field(default_factory=list, description="步骤结果列表")
     error_message: Optional[str] = Field(default=None, description="错误信息")
     report_path: Optional[str] = Field(default=None, description="报告路径")
-    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="额外元数�?)
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="额外元数据")
 
     @property
     def passed_steps(self) -> int:
@@ -112,8 +112,7 @@ class TestResult(BaseModel):
 
     @property
     def success_rate(self) -> float:
-        """成功�?""
+        """成功率"""
         if self.total_steps == 0:
             return 0.0
         return self.passed_steps / self.total_steps * 100
-

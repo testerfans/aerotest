@@ -1,6 +1,6 @@
 """事件监听器检测器
 
-使用 CDP DOMDebugger.getEventListeners 检测元素绑定的事件监听�?
+使用 CDP DOMDebugger.getEventListeners 检测元素绑定的事件监听器
 """
 
 from dataclasses import dataclass
@@ -13,12 +13,12 @@ logger = get_logger("aerotest.dom.event_listener")
 
 @dataclass
 class EventListenerInfo:
-    """事件监听器信�?""
+    """事件监听器信息"""
     
-    type: str  # 事件类型（click, input, change, etc.�?
+    type: str  # 事件类型（click, input, change, etc.）
     use_capture: bool = False  # 是否捕获阶段
     passive: bool = False  # 是否被动监听
-    once: bool = False  # 是否只触发一�?
+    once: bool = False  # 是否只触发一次
     handler_body: Optional[str] = None  # 处理函数代码（可选）
     
     def __repr__(self) -> str:
@@ -37,15 +37,15 @@ class EventListenerInfo:
 class EventListenerDetector:
     """事件监听器检测器
     
-    核心能力�?
-    - 检测元素绑定的事件监听�?
-    - 支持所有事件类型（click, input, change, mousedown, etc.�?
-    - 识别非标准交互元�?
+    核心能力：
+    - 检测元素绑定的事件监听器
+    - 支持所有事件类型（click, input, change, mousedown, etc.）
+    - 识别非标准交互元素
     
-    使用场景�?
-    - L3 层检测非标控件（�?div 绑定�?click 事件�?
-    - 验证元素是否可交�?
-    - 调试和分析页面交�?
+    使用场景：
+    - L3 层检测非标控件（如 div 绑定了 click 事件）
+    - 验证元素是否可交互
+    - 调试和分析页面交互
     
     Example:
         ```python
@@ -59,11 +59,11 @@ class EventListenerDetector:
         
         has_click = any(l.type == "click" for l in listeners)
         if has_click:
-            print("元素可点�?)
+            print("元素可点击")
         ```
     """
     
-    # 常见的交互事件类�?
+    # 常见的交互事件类型
     INTERACTIVE_EVENTS = {
         "click", "dblclick", "mousedown", "mouseup",
         "input", "change", "keydown", "keyup", "keypress",
@@ -74,7 +74,7 @@ class EventListenerDetector:
     
     def __init__(self):
         """初始化事件监听器检测器"""
-        logger.debug("事件监听器检测器初始化完�?)
+        logger.debug("事件监听器检测器初始化完成")
     
     async def get_event_listeners(
         self,
@@ -87,16 +87,16 @@ class EventListenerDetector:
         获取元素的事件监听器
         
         Args:
-            cdp_client: CDP 客户�?
+            cdp_client: CDP 客户端
             node_id: DOM 节点 ID (backend_node_id)
             session_id: CDP Session ID
-            depth: 递归深度（默�?1，只检测当前元素）
+            depth: 递归深度（默认 1，只检测当前元素）
             
         Returns:
-            事件监听器列�?
+            事件监听器列表
         """
         try:
-            # 1. �?backend_node_id 转换�?Remote Object
+            # 1. 从 backend_node_id 转换为 Remote Object
             # 注意：CDP 需要先 resolveNode 才能获取 objectId
             resolve_result = await cdp_client.send(
                 "DOM.resolveNode",
@@ -110,18 +110,18 @@ class EventListenerDetector:
             
             object_id = resolve_result["object"]["objectId"]
             
-            # 2. 获取事件监听�?
+            # 2. 获取事件监听器
             listeners_result = await cdp_client.send(
                 "DOMDebugger.getEventListeners",
                 {
                     "objectId": object_id,
                     "depth": depth,  # 递归深度
-                    "pierce": True,  # 穿�?Shadow DOM
+                    "pierce": True,  # 穿透 Shadow DOM
                 },
                 session_id=session_id
             )
             
-            # 3. 解析事件监听�?
+            # 3. 解析事件监听器
             event_listeners = []
             for listener in listeners_result.get("listeners", []):
                 event_info = EventListenerInfo(
@@ -134,14 +134,14 @@ class EventListenerDetector:
             
             if event_listeners:
                 logger.debug(
-                    f"节点 {node_id} �?{len(event_listeners)} 个事件监听器: "
+                    f"节点 {node_id} 有 {len(event_listeners)} 个事件监听器: "
                     f"{[l.type for l in event_listeners]}"
                 )
             
             return event_listeners
         
         except Exception as e:
-            logger.warning(f"获取事件监听器失�?(node_id={node_id}): {str(e)}")
+            logger.warning(f"获取事件监听器失败 (node_id={node_id}): {str(e)}")
             return []
     
     def has_interactive_events(
@@ -152,10 +152,10 @@ class EventListenerDetector:
         判断是否有交互事件监听器
         
         Args:
-            listeners: 事件监听器列�?
+            listeners: 事件监听器列表
             
         Returns:
-            是否有交互事�?
+            是否有交互事件
         """
         return any(
             l.type in self.INTERACTIVE_EVENTS
@@ -168,14 +168,14 @@ class EventListenerDetector:
         event_type: str
     ) -> bool:
         """
-        判断是否有特定类型的事件监听�?
+        判断是否有特定类型的事件监听器
         
         Args:
-            listeners: 事件监听器列�?
-            event_type: 事件类型（如 "click"�?
+            listeners: 事件监听器列表
+            event_type: 事件类型（如 "click"）
             
         Returns:
-            是否有该类型的事�?
+            是否有该类型的事件
         """
         return any(l.type == event_type for l in listeners)
     
@@ -185,17 +185,16 @@ class EventListenerDetector:
         event_types: list[str]
     ) -> list[EventListenerInfo]:
         """
-        按事件类型过�?
+        按事件类型过滤
         
         Args:
-            listeners: 事件监听器列�?
+            listeners: 事件监听器列表
             event_types: 事件类型列表
             
         Returns:
-            过滤后的监听器列�?
+            过滤后的监听器列表
         """
         return [
             l for l in listeners
             if l.type in event_types
         ]
-

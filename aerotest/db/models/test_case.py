@@ -1,4 +1,4 @@
-"""测试用例模型"""
+"""æµè¯ç¨ä¾æ¨¡å"""
 
 from datetime import datetime
 from typing import List, Optional
@@ -10,7 +10,7 @@ from aerotest.db.base import Base
 
 
 class TestCase(Base):
-    """测试用例模型"""
+    """æµè¯ç¨ä¾æ¨¡å"""
 
     __tablename__ = "test_cases"
 

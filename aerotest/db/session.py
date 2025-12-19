@@ -1,4 +1,4 @@
-"""数据库会话管�?""
+"""数据库会话管理"""
 
 from typing import AsyncGenerator
 
@@ -27,14 +27,13 @@ async_session = sessionmaker(
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
-    获取数据库会�?
+    获取数据库会话
 
     Yields:
-        AsyncSession: 数据库会�?
+        AsyncSession: 数据库会话
     """
     async with async_session() as session:
         try:
             yield session
         finally:
             await session.close()
-

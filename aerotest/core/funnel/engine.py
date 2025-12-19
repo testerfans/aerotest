@@ -37,23 +37,23 @@ class FunnelEngine:
 
     def __init__(self, dom_adapter: Any):
         """
-        初始化漏斗引�?
+        初始化漏斗引擎
 
         Args:
-            dom_adapter: DOM 适配器实�?
+            dom_adapter: DOM 适配器实例
         """
         self.settings = get_settings()
         self.dom_adapter = dom_adapter
 
-        # 初始化各�?
+        # 初始化各层
         self.layers: List[Any] = []
         self._init_layers()
 
-        logger.info("漏斗引擎初始化完�?)
+        logger.info("漏斗引擎初始化完成")
 
     def _init_layers(self) -> None:
         """初始化各层处理器"""
-        # TODO: 根据配置初始化各�?
+        # TODO: 根据配置初始化各层
         # if self.settings.l1_enabled:
         #     from aerotest.core.funnel.l1_rule import L1RuleLayer
         #     self.layers.append(L1RuleLayer())
@@ -62,22 +62,22 @@ class FunnelEngine:
         #     from aerotest.core.funnel.l2_attribute import L2AttributeLayer
         #     self.layers.append(L2AttributeLayer())
 
-        # ... 其他�?
+        # ... 其他层
 
-        logger.info(f"已启�?{len(self.layers)} 个漏斗层")
+        logger.info(f"已启用 {len(self.layers)} 个漏斗层")
 
     async def locate_element(self, selector: str, context: Optional[Dict[str, Any]] = None) -> FunnelResult:
         """
         通过漏斗机制定位元素
 
         Args:
-            selector: 元素选择器（支持自然语言�?
-            context: 可选的上下文信�?
+            selector: 元素选择器（支持自然语言）
+            context: 可选的上下文信息
 
         Returns:
             FunnelResult: 漏斗查询结果
         """
-        logger.info(f"开始漏斗定�? selector='{selector}'")
+        logger.info(f"开始漏斗定位: selector='{selector}'")
         context = context or {}
 
         # 依次尝试各层
@@ -94,12 +94,11 @@ class FunnelEngine:
                 logger.warning(f"{layer.__class__.__name__} 处理失败: {e}")
                 continue
 
-        # 所有层都失�?
-        logger.error(f"所有漏斗层都未能定位元�? '{selector}'")
+        # 所有层都失败
+        logger.error(f"所有漏斗层都未能定位元素: '{selector}'")
         return FunnelResult(
             strategy=ElementLocatorStrategy.FALLBACK,
             element=None,
             confidence=0.0,
             metadata={"error": "All layers failed"},
         )
-

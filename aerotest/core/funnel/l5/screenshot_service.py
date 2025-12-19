@@ -1,6 +1,6 @@
 """截图服务
 
-提供页面和元素截图功�?
+提供页面和元素截图功能
 """
 
 import base64
@@ -16,7 +16,7 @@ logger = get_logger("aerotest.funnel.l5.screenshot")
 class ScreenshotService:
     """截图服务
     
-    提供页面和元素截图功能（基于 CDP�?
+    提供页面和元素截图功能（基于 CDP）
     
     Example:
         ```python
@@ -34,8 +34,8 @@ class ScreenshotService:
     """
     
     def __init__(self):
-        """初始化截图服�?""
-        logger.debug("截图服务初始化完�?)
+        """初始化截图服务"""
+        logger.debug("截图服务初始化完成")
     
     async def capture_screenshot(
         self,
@@ -48,11 +48,11 @@ class ScreenshotService:
         
         Args:
             cdp_session: CDP 会话
-            format: 图片格式（png �?jpeg�?
-            quality: 图片质量�?-100，仅 jpeg 有效�?
+            format: 图片格式（png 或 jpeg）
+            quality: 图片质量（0-100，仅 jpeg 有效）
             
         Returns:
-            截图的字节数�?
+            截图的字节数据
         """
         try:
             # 使用 CDP Page.captureScreenshot 命令
@@ -87,7 +87,7 @@ class ScreenshotService:
             format: 图片格式
             
         Returns:
-            截图的字节数据，如果元素没有位置信息则返�?None
+            截图的字节数据，如果元素没有位置信息则返回 None
         """
         if not element.bounding_box:
             logger.warning("元素没有位置信息")
@@ -121,7 +121,7 @@ class ScreenshotService:
     
     def encode_image_to_base64(self, image_data: bytes) -> str:
         """
-        将图片数据编码为 base64 字符�?
+        将图片数据编码为 base64 字符串
         
         Args:
             image_data: 图片字节数据
@@ -130,4 +130,3 @@ class ScreenshotService:
             base64 编码的字符串
         """
         return base64.b64encode(image_data).decode("utf-8")
-

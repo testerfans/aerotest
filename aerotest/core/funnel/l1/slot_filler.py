@@ -1,6 +1,6 @@
-"""槽位填充�?
+"""槽位填充器
 
-将意图识别和实体提取的结果组合成完整的动作槽�?
+将意图识别和实体提取的结果组合成完整的动作槽位
 """
 
 from typing import Optional
@@ -14,16 +14,16 @@ logger = get_logger("aerotest.funnel.l1.slot")
 
 
 class SlotFiller:
-    """槽位填充�?
+    """槽位填充器
     
     整合意图识别和实体提取的结果，生成完整的动作槽位
     
-    处理流程�?
+    处理流程：
     1. 使用 IntentRecognizer 识别动作类型
     2. 使用 EntityExtractor 提取目标信息
-    3. 组合结果并填�?ActionSlot
-    4. 提取输入值（对于 INPUT 动作�?
-    5. 计算综合置信�?
+    3. 组合结果并填充 ActionSlot
+    4. 提取输入值（对于 INPUT 动作）
+    5. 计算综合置信度
     
     Example:
         ```python
@@ -56,7 +56,7 @@ class SlotFiller:
             text: 自然语言指令
             
         Returns:
-            填充完整的动作槽�?
+            填充完整的动作槽位
         """
         text = text.strip()
         
@@ -78,12 +78,12 @@ class SlotFiller:
             entity_info["target_type"],
         )
         
-        # 3. 提取输入值（如果�?INPUT 动作�?
+        # 3. 提取输入值（如果是 INPUT 动作）
         value = None
         if action == ActionType.INPUT:
             value = self._extract_input_value(text)
         
-        # 4. 计算综合置信�?
+        # 4. 计算综合置信度
         confidence = self._calculate_confidence(
             action_confidence,
             entity_confidence,
@@ -106,7 +106,7 @@ class SlotFiller:
         return slot
     
     def _get_action_keywords(self, action: ActionType) -> list[str]:
-        """获取动作的关键词列表（用于实体提取时过滤�?""
+        """获取动作的关键词列表（用于实体提取时过滤）"""
         from aerotest.core.funnel.l1.action_patterns import ACTION_KEYWORDS
         
         action_data = ACTION_KEYWORDS.get(action, {})
@@ -114,28 +114,28 @@ class SlotFiller:
     
     def _extract_input_value(self, text: str) -> Optional[str]:
         """
-        提取输入�?
+        提取输入值
         
-        对于 INPUT 动作，尝试提取要输入的�?
+        对于 INPUT 动作，尝试提取要输入的值
         
         Args:
             text: 指令文本
             
         Returns:
-            输入值（如果能提取到�?
+            输入值（如果能提取到）
         
         Example:
-            "输入用户�?admin" -> "admin"
+            "输入用户名 admin" -> "admin"
             "在密码框输入 123456" -> "123456"
         """
         import re
         
-        # 模式：动作词 + 目标 + �?
+        # 模式：动作词 + 目标 + 值
         patterns = [
-            r"输入.*[\"'](.*?)[\"']",  # 输入 "�?
-            r"填写.*[\"'](.*?)[\"']",  # 填写 "�?
-            r"输入.*\s+(\S+)$",        # 输入 �?
-            r"填写.*\s+(\S+)$",        # 填写 �?
+            r"输入.*[\"'](.*?)[\"']",  # 输入 "值"
+            r"填写.*[\"'](.*?)[\"']",  # 填写 "值"
+            r"输入.*\s+(\S+)$",        # 输入 值
+            r"填写.*\s+(\S+)$",        # 填写 值
         ]
         
         for pattern in patterns:
@@ -143,7 +143,7 @@ class SlotFiller:
             if match:
                 value = match.group(1).strip()
                 if value:
-                    logger.debug(f"提取到输入�? '{value}'")
+                    logger.debug(f"提取到输入值: '{value}'")
                     return value
         
         return None
@@ -156,25 +156,25 @@ class SlotFiller:
         element_type: Optional[ElementType],
     ) -> float:
         """
-        计算综合置信�?
+        计算综合置信度
         
         Args:
-            action_confidence: 动作识别置信�?
-            entity_confidence: 实体提取置信�?
+            action_confidence: 动作识别置信度
+            entity_confidence: 实体提取置信度
             action: 动作类型
             element_type: 元素类型
             
         Returns:
-            综合置信�?
+            综合置信度
         """
         # 基础置信度：两者的加权平均
-        # 动作识别更重要（权重 0.6�?
+        # 动作识别更重要（权重 0.6）
         base_confidence = action_confidence * 0.6 + entity_confidence * 0.4
         
         # 调整因子
         adjustment = 0.0
         
-        # 如果动作和元素类型匹配，提升置信�?
+        # 如果动作和元素类型匹配，提升置信度
         if self._action_element_match(action, element_type):
             adjustment += 0.1
         
@@ -182,7 +182,7 @@ class SlotFiller:
         if element_type is None:
             adjustment -= 0.1
         
-        # 确保�?[0.0, 1.0] 范围�?
+        # 确保在 [0.0, 1.0] 范围内
         final_confidence = max(0.0, min(1.0, base_confidence + adjustment))
         
         return final_confidence
@@ -238,4 +238,3 @@ class SlotFiller:
             槽位列表
         """
         return [self.fill(instruction) for instruction in instructions]
-

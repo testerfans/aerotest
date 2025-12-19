@@ -13,10 +13,10 @@ def setup_logger() -> None:
     """配置日志系统"""
     settings = get_settings()
 
-    # 移除默认�?handler
+    # 移除默认的 handler
     logger.remove()
 
-    # 控制台输�?
+    # 控制台输出
     logger.add(
         sys.stdout,
         level=settings.log_level,
@@ -69,6 +69,5 @@ def get_logger(name: str) -> Any:
     return logger.bind(name=name)
 
 
-# 初始化日志系�?
+# 初始化日志系统
 setup_logger()
-

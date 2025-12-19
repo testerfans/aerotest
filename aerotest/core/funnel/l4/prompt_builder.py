@@ -1,4 +1,4 @@
-"""Prompt 构建�?
+"""Prompt 构建器
 
 构建高质量的 Qwen Prompt
 """
@@ -13,11 +13,11 @@ logger = get_logger("aerotest.funnel.l4.prompt")
 
 
 class PromptBuilder:
-    """Prompt 构建�?
+    """Prompt 构建器
     
-    为不同的 L4 任务构建 Prompt�?
-    - 元素选择：从候选中选择最佳匹�?
-    - 信息提取：从元素中提取特定信�?
+    为不同的 L4 任务构建 Prompt：
+    - 元素选择：从候选中选择最佳匹配
+    - 信息提取：从元素中提取特定信息
     - 逻辑推理：处理复杂的业务逻辑
     
     Example:
@@ -25,28 +25,28 @@ class PromptBuilder:
         builder = PromptBuilder()
         
         messages = builder.build_element_selection_prompt(
-            instruction="选择最便宜的商�?,
+            instruction="选择最便宜的商品",
             candidates=[...],
         )
         ```
     """
     
-    SYSTEM_PROMPT = """你是一个专业的 Web 自动化测试助手。你的任务是根据用户的指令，从给定的 DOM 元素中选择最合适的目标元素�?
+    SYSTEM_PROMPT = """你是一个专业的 Web 自动化测试助手。你的任务是根据用户的指令，从给定的 DOM 元素中选择最合适的目标元素。
 
 你需要：
-1. 仔细理解用户的指令意�?
+1. 仔细理解用户的指令意图
 2. 分析每个候选元素的属性和内容
-3. 根据指令要求，选择最匹配的元�?
-4. 返回选中元素的索引（�?0 开始）
+3. 根据指令要求，选择最匹配的元素
+4. 返回选中元素的索引（从 0 开始）
 
-注意�?
-- 如果指令包含"第一�?�?最后一�?等序号，优先考虑位置
-- 如果指令包含"最�?�?最便宜"等比较，需要比较数�?
-- 如果指令包含"红色"�?大号"等描述，需要匹配属�?
+注意：
+- 如果指令包含"第一个"、"最后一个"等序号，优先考虑位置
+- 如果指令包含"最贵"、"最便宜"等比较，需要比较数值
+- 如果指令包含"红色"、"大号"等描述，需要匹配属性
 - 如果无法确定，返回最可能的选项"""
     
     def __init__(self):
-        """初始�?Prompt 构建�?""
+        """初始化 Prompt 构建器"""
         logger.debug("Prompt 构建器初始化完成")
     
     def build_element_selection_prompt(
@@ -60,13 +60,13 @@ class PromptBuilder:
         
         Args:
             instruction: 用户指令
-            candidates: 候选元素列�?
+            candidates: 候选元素列表
             context: 额外的上下文信息
             
         Returns:
             消息列表
         """
-        # 构建候选元素描�?
+        # 构建候选元素描述
         candidates_desc = []
         for i, result in enumerate(candidates):
             element = result.element
@@ -78,16 +78,16 @@ class PromptBuilder:
         # 构建用户消息
         user_message = f"""用户指令：{instruction}
 
-候选元素列表（�?{len(candidates)} 个）�?
+候选元素列表（共 {len(candidates)} 个）：
 
 {candidates_text}
 
-请根据用户指令，选择最合适的元素�?
+请根据用户指令，选择最合适的元素。
 
-返回 JSON 格式�?
+返回 JSON 格式：
 {{
     "selected_index": 选中的元素索引（0-{len(candidates)-1}），
-    "reason": "选择原因的简短说�?
+    "reason": "选择原因的简短说明"
 }}"""
         
         messages = [
@@ -109,7 +109,7 @@ class PromptBuilder:
         Args:
             instruction: 用户指令
             elements: 元素列表
-            extract_type: 提取类型（text, number, list�?
+            extract_type: 提取类型（text, number, list）
             
         Returns:
             消息列表
@@ -124,10 +124,10 @@ class PromptBuilder:
         
         # 根据提取类型构建 prompt
         if extract_type == "number":
-            task_desc = "从元素中提取数值信息（如价格、数量等�?
+            task_desc = "从元素中提取数值信息（如价格、数量等）"
             return_format = """{{
     "values": [提取的数值列表],
-    "unit": "单位（如果有�?
+    "unit": "单位（如果有）"
 }}"""
         elif extract_type == "list":
             task_desc = "从元素中提取列表信息"
@@ -144,11 +144,11 @@ class PromptBuilder:
 
 用户指令：{instruction}
 
-元素列表（共 {len(elements)} 个）�?
+元素列表（共 {len(elements)} 个）：
 
 {elements_text}
 
-请{task_desc}，返�?JSON 格式�?
+请{task_desc}，返回 JSON 格式：
 {return_format}"""
         
         messages = [
@@ -170,7 +170,7 @@ class PromptBuilder:
         Args:
             instruction: 用户指令
             elements: 元素列表
-            comparison_type: 比较类型（value, text, attribute�?
+            comparison_type: 比较类型（value, text, attribute）
             
         Returns:
             消息列表
@@ -187,16 +187,16 @@ class PromptBuilder:
 
 用户指令：{instruction}
 
-元素列表（共 {len(elements)} 个）�?
+元素列表（共 {len(elements)} 个）：
 
 {elements_text}
 
-请根据指令中的比较要求（�?最�?�?最便宜"�?最�?等），选择符合条件的元素�?
+请根据指令中的比较要求（如"最贵"、"最便宜"、"最大"等），选择符合条件的元素。
 
-返回 JSON 格式�?
+返回 JSON 格式：
 {{
-    "selected_index": 选中的元素索�?
-    "comparison_value": "比较的�?,
+    "selected_index": 选中的元素索引,
+    "comparison_value": "比较的值",
     "reason": "选择原因"
 }}"""
         
@@ -213,7 +213,7 @@ class PromptBuilder:
         index: Optional[int] = None,
     ) -> str:
         """
-        描述一个元�?
+        描述一个元素
         
         Args:
             element: DOM 元素
@@ -226,18 +226,18 @@ class PromptBuilder:
         
         # 索引
         if index is not None:
-            lines.append(f"【元�?{index}�?)
+            lines.append(f"【元素 {index}】")
         
-        # 标签�?
+        # 标签名
         lines.append(f"标签: <{element.tag_name}>")
         
-        # 重要属�?
+        # 重要属性
         important_attrs = ["id", "name", "class", "type", "value", "placeholder", "aria-label", "title"]
         
         for attr in important_attrs:
             value = element.attributes.get(attr)
             if value:
-                # 截断过长的�?
+                # 截断过长的值
                 if len(value) > 100:
                     value = value[:97] + "..."
                 lines.append(f"{attr}: {value}")
@@ -257,4 +257,3 @@ class PromptBuilder:
             lines.append(f"位置: ({bbox.x:.0f}, {bbox.y:.0f}), 大小: ({bbox.width:.0f}×{bbox.height:.0f})")
         
         return "\n".join(lines)
-

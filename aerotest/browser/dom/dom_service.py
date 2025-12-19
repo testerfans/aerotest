@@ -3,7 +3,7 @@
 提供高层 DOM 操作接口，封装底层的 DOM 序列化和处理逻辑
 
 来源: browser-use v0.11.2
-改�? 简化版本，暂时移除 CDP 集成（Week 3 完成�?
+改动: 简化版本，暂时移除 CDP 集成（Week 3 完成）
 """
 
 import logging
@@ -24,11 +24,11 @@ logger = get_logger("aerotest.dom.service")
 
 class DomService:
     """
-    DOM 服务，用于获�?DOM 树和其他 DOM 相关信息
+    DOM 服务，用于获取 DOM 树和其他 DOM 相关信息
     
-    这是一个高层接口，封装�?DOM 序列化和处理的复杂性�?
+    这是一个高层接口，封装了 DOM 序列化和处理的复杂性。
     
-    Note: 完整�?CDP 集成将在 Week 3 实现
+    Note: 完整的 CDP 集成将在 Week 3 实现
     """
 
     def __init__(
@@ -39,13 +39,13 @@ class DomService:
         logger: Optional[logging.Logger] = None,
     ):
         """
-        初始�?DOM 服务
+        初始化 DOM 服务
         
         Args:
             paint_order_filtering: 是否启用绘制顺序过滤
-            bbox_filtering: 是否启用边界框过�?
-            containment_threshold: 包含阈值（0.0-1.0�?
-            logger: 可选的日志记录�?
+            bbox_filtering: 是否启用边界框过滤
+            containment_threshold: 包含阈值（0.0-1.0）
+            logger: 可选的日志记录器
         """
         self.paint_order_filtering = paint_order_filtering
         self.bbox_filtering = bbox_filtering
@@ -60,19 +60,19 @@ class DomService:
         session_id: Optional[str] = None,
     ) -> tuple[SerializedDOMState, dict[str, float]]:
         """
-        序列�?DOM 树为可访问元�?
+        序列化 DOM 树为可访问元素
         
         Args:
-            root_node: DOM 树的根节�?
-            previous_state: 可选的之前的状态（用于检测新元素�?
-            include_attributes: 要包含的属性列�?
+            root_node: DOM 树的根节点
+            previous_state: 可选的之前的状态（用于检测新元素）
+            include_attributes: 要包含的属性列表
             session_id: 可选的会话 ID
         
         Returns:
             (SerializedDOMState, timing_info) 元组
         """
         try:
-            self.logger.debug("开始序列化 DOM �?)
+            self.logger.debug("开始序列化 DOM 树")
             
             # 创建序列化器
             serializer = DOMTreeSerializer(
@@ -84,18 +84,18 @@ class DomService:
                 session_id=session_id,
             )
             
-            # 执行序列�?
+            # 执行序列化
             state, timing = serializer.serialize_accessible_elements()
             
             self.logger.debug(
-                f"DOM 序列化完�? {len(state.selector_map)} 个可交互元素, "
+                f"DOM 序列化完成: {len(state.selector_map)} 个可交互元素, "
                 f"耗时 {timing.get('serialize_accessible_elements_total', 0)*1000:.1f}ms"
             )
             
             return state, timing
             
         except Exception as e:
-            self.logger.error(f"DOM 序列化失�? {e}")
+            self.logger.error(f"DOM 序列化失败: {e}")
             raise
 
     def get_llm_representation(
@@ -104,14 +104,14 @@ class DomService:
         include_attributes: Optional[list[str]] = None,
     ) -> str:
         """
-        获取适合 LLM 使用�?DOM 表示
+        获取适合 LLM 使用的 DOM 表示
         
         Args:
-            state: 序列化的 DOM 状�?
-            include_attributes: 要包含的属性列�?
+            state: 序列化的 DOM 状态
+            include_attributes: 要包含的属性列表
         
         Returns:
-            格式化的 DOM 字符�?
+            格式化的 DOM 字符串
         """
         try:
             attributes = include_attributes or DEFAULT_INCLUDE_ATTRIBUTES
@@ -129,7 +129,7 @@ class DomService:
         通过 backend_node_id 查找元素
         
         Args:
-            state: 序列化的 DOM 状�?
+            state: 序列化的 DOM 状态
             backend_node_id: 后端节点 ID
         
         Returns:
@@ -149,15 +149,15 @@ class DomService:
         获取所有可点击元素
         
         Args:
-            state: 序列化的 DOM 状�?
+            state: 序列化的 DOM 状态
         
         Returns:
-            可点击元素列�?
+            可点击元素列表
         """
         try:
             return list(state.selector_map.values())
         except Exception as e:
-            self.logger.error(f"获取可点击元素失�? {e}")
+            self.logger.error(f"获取可点击元素失败: {e}")
             return []
 
     def get_clickable_elements_summary(
@@ -168,7 +168,7 @@ class DomService:
         获取可点击元素的摘要信息
         
         Args:
-            state: 序列化的 DOM 状�?
+            state: 序列化的 DOM 状态
         
         Returns:
             元素摘要列表
@@ -209,7 +209,7 @@ class DomService:
         check_parents: bool = False,
     ) -> bool:
         """
-        检查元素是否可�?
+        检查元素是否可见
         
         Args:
             node: DOM 节点
@@ -221,11 +221,11 @@ class DomService:
         if not node.snapshot_node:
             return False
 
-        # 检查基本可见�?
+        # 检查基本可见性
         if node.is_visible is False:
             return False
 
-        # 检查计算样�?
+        # 检查计算样式
         if node.snapshot_node.computed_styles:
             styles = node.snapshot_node.computed_styles
             
@@ -254,12 +254,12 @@ class DomService:
         通过文本内容查找元素
         
         Args:
-            state: 序列化的 DOM 状�?
+            state: 序列化的 DOM 状态
             text: 要搜索的文本
             exact_match: 是否精确匹配
         
         Returns:
-            匹配的元素列�?
+            匹配的元素列表
         """
         matching_elements = []
         
@@ -284,11 +284,11 @@ class DomService:
         通过 XPath 查找元素
         
         Args:
-            state: 序列化的 DOM 状�?
-            xpath: XPath 表达�?
+            state: 序列化的 DOM 状态
+            xpath: XPath 表达式
         
         Returns:
-            匹配的元素列�?
+            匹配的元素列表
         """
         matching_elements = []
         
@@ -328,7 +328,7 @@ class DomService:
         获取 DOM 统计信息
         
         Args:
-            state: 序列化的 DOM 状�?
+            state: 序列化的 DOM 状态
         
         Returns:
             统计信息字典
@@ -343,7 +343,7 @@ class DomService:
         }
         
         for element in state.selector_map.values():
-            # 按标签统�?
+            # 按标签统计
             tag = element.tag_name
             stats["elements_by_tag"][tag] = stats["elements_by_tag"].get(tag, 0) + 1
             
@@ -351,15 +351,15 @@ class DomService:
             if element.is_visible:
                 stats["visible_elements"] += 1
             
-            # 可滚动元�?
+            # 可滚动元素
             if element.is_actually_scrollable:
                 stats["scrollable_elements"] += 1
             
-            # iframe 检�?
+            # iframe 检测
             if tag.upper() in ("IFRAME", "FRAME"):
                 stats["has_iframes"] = True
             
-            # Shadow DOM 检�?
+            # Shadow DOM 检测
             if element.shadow_roots:
                 stats["has_shadow_dom"] = True
         
@@ -373,11 +373,11 @@ def create_dom_service(
     bbox_filtering: bool = True,
 ) -> DomService:
     """
-    创建 DOM 服务实例的便捷函�?
+    创建 DOM 服务实例的便捷函数
     
     Args:
         paint_order_filtering: 是否启用绘制顺序过滤
-        bbox_filtering: 是否启用边界框过�?
+        bbox_filtering: 是否启用边界框过滤
     
     Returns:
         DomService 实例
@@ -394,12 +394,12 @@ def serialize_and_get_llm_representation(
     bbox_filtering: bool = True,
 ) -> tuple[str, SerializedDOMState, dict[str, float]]:
     """
-    一步完成序列化和获�?LLM 表示的便捷函�?
+    一步完成序列化和获取 LLM 表示的便捷函数
     
     Args:
-        root_node: DOM 树的根节�?
+        root_node: DOM 树的根节点
         paint_order_filtering: 是否启用绘制顺序过滤
-        bbox_filtering: 是否启用边界框过�?
+        bbox_filtering: 是否启用边界框过滤
     
     Returns:
         (llm_representation, state, timing_info) 元组
@@ -413,4 +413,3 @@ def serialize_and_get_llm_representation(
     llm_repr = service.get_llm_representation(state)
     
     return llm_repr, state, timing
-

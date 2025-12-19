@@ -1,4 +1,4 @@
-"""AI 模型集成模块"""
+"""AI æ¨¡åéææ¨¡å"""
 
 from aerotest.ai.models.qwen import QwenClient
 
